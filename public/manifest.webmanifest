@@ -1,0 +1,56 @@
+{
+  "name": "Mandi Relay — Voice-first agricultural marketplace",
+  "short_name": "Mandi Relay",
+  "description": "Speak what you have harvested. Discover nearby buyers, compare offers and sell smarter. A voice-first produce marketplace for India.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#F5F3EC",
+  "theme_color": "#183D2B",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["business", "shopping", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "List produce by voice",
+      "short_name": "Voice listing",
+      "url": "/farmer/voice-listing",
+      "description": "Speak a harvest and publish a listing"
+    },
+    {
+      "name": "Browse marketplace",
+      "short_name": "Marketplace",
+      "url": "/buyer/marketplace",
+      "description": "Find produce nearby"
+    },
+    {
+      "name": "My offers",
+      "short_name": "Offers",
+      "url": "/farmer/offers",
+      "description": "Review incoming offers"
+    }
+  ]
+}
