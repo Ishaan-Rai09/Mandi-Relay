@@ -1,26 +1,236 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Mandi Relay design system.
+ *
+ * Forest green carries brand and primary action, harvest gold is reserved for
+ * offers, auctions and moments that need attention, ivory is the working
+ * surface. Every semantic colour is paired with a contrast-tested foreground.
+ */
+
+@theme {
+  --color-forest: #183d2b;
+  --color-forest-950: #0e2419;
+  --color-forest-900: #132f21;
+  --color-forest-800: #183d2b;
+  --color-forest-700: #1f4d37;
+  --color-forest-600: #2a6147;
+  --color-forest-500: #3a7a5b;
+  --color-forest-400: #5c9a7b;
+  --color-forest-100: #dfe9e2;
+  --color-forest-50: #eff4f0;
+
+  --color-charcoal: #151a17;
+  --color-charcoal-800: #232a26;
+  --color-charcoal-700: #333b36;
+  --color-charcoal-500: #5b655f;
+  --color-charcoal-400: #78827c;
+
+  --color-gold: #f4b942;
+  --color-gold-700: #a97b12;
+  --color-gold-600: #c99420;
+  --color-gold-500: #f4b942;
+  --color-gold-200: #fbe3ac;
+  --color-gold-100: #fdf1d6;
+  --color-gold-50: #fef8ec;
+
+  --color-ivory: #f5f3ec;
+  --color-ivory-200: #ece8dc;
+  --color-ivory-300: #ded9c9;
+
+  --color-sage: #778178;
+  --color-sage-200: #c9cfc9;
+
+  --color-success: #226b45;
+  --color-success-soft: #e4f0e8;
+  --color-warning: #9a6a06;
+  --color-warning-soft: #fdf1d6;
+  --color-danger: #a3352b;
+  --color-danger-soft: #fbe9e7;
+  --color-info: #20586e;
+  --color-info-soft: #e5eff3;
+
+  --font-display: "Manrope Variable", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Inter Variable", "Noto Sans Gurmukhi Variable",
+    "Noto Sans Devanagari Variable", "Segoe UI", system-ui, sans-serif;
+  --font-devanagari: "Noto Sans Devanagari Variable", "Noto Sans Gurmukhi Variable",
+    "Inter Variable", sans-serif;
+
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-e1: 0 1px 2px rgb(21 26 23 / 0.06), 0 1px 1px rgb(21 26 23 / 0.04);
+  --shadow-e2: 0 2px 6px rgb(21 26 23 / 0.07), 0 1px 2px rgb(21 26 23 / 0.05);
+  --shadow-e3: 0 12px 32px -12px rgb(21 26 23 / 0.24), 0 2px 8px rgb(21 26 23 / 0.06);
+  --shadow-e4: 0 28px 60px -24px rgb(21 26 23 / 0.35);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --text-hero: clamp(2.5rem, 6.2vw, 4.75rem);
+  --text-hero--line-height: 1.02;
+  --text-hero--letter-spacing: -0.035em;
+
+  --text-display: clamp(2rem, 3.6vw, 2.75rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.028em;
+
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.018em;
+
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.14em;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  * {
+    border-color: var(--color-ivory-300);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--color-forest-100);
+    color: var(--color-forest-900);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-forest-600);
+    outline-offset: 2px;
+  }
+
+  input, textarea, select, button {
+    font: inherit;
+  }
+
+  /* Numerals line up in tables and price columns. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .container-x {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 82rem;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-x { padding-inline: 1.5rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .container-x { padding-inline: 2rem; }
+  }
+
+  .eyebrow {
+    font-size: var(--text-eyebrow);
+    letter-spacing: var(--text-eyebrow--letter-spacing);
+    line-height: 1.2;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-sage);
+  }
+
+  .hairline {
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      var(--color-ivory-300),
+      transparent
+    );
+    height: 1px;
+  }
+
+  /* Fine rule used to structure sections without wrapping them in cards. */
+  .rule {
+    border-top: 1px solid var(--color-ivory-300);
+  }
+
+  .field-base {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-ivory-300);
+    background-color: #fff;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--color-charcoal);
+    transition: border-color 140ms var(--ease-out-soft), box-shadow 140ms var(--ease-out-soft);
+  }
+
+  .field-base::placeholder {
+    color: var(--color-charcoal-400);
+  }
+
+  .field-base:hover {
+    border-color: var(--color-sage-200);
+  }
+
+  .field-base:focus {
+    outline: none;
+    border-color: var(--color-forest-600);
+    box-shadow: 0 0 0 3px rgb(42 97 71 / 0.12);
+  }
+
+  .field-base[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-ivory-200) 25%,
+      var(--color-ivory) 37%,
+      var(--color-ivory-200) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+
+  .paper {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgb(24 61 43 / 0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
