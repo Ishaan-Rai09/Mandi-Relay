@@ -11,12 +11,11 @@ import {
   TrendingUp,
   Users,
   Wallet,
-  Wheat,
 } from "lucide-react";
 
 import { OfferCard } from "@/components/farmer/offer-card";
 import { ButtonLink } from "@/components/ui/button";
-import { DemoTag, Panel, PanelHeader, Pill, VerifiedBadge } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill, VerifiedBadge } from "@/components/ui/panel";
 import { EmptyState, PageHeader, Stat } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { loadFarmerDashboard } from "@/lib/queries/farmer";
@@ -224,7 +223,7 @@ export default async function FarmerDashboard() {
                           <span className="ml-1.5 text-[10.5px] text-charcoal-400">
                             {listing.location}
                           </span>
-                          {listing.isDemo ? <DemoTag className="ml-1.5" /> : null}
+                          
                         </td>
                         <td className="px-3.5 py-2.5 text-charcoal-500 tabular">
                           {formatNumber(listing.availableQuantity)} / {formatNumber(listing.quantity)} kg
@@ -285,7 +284,7 @@ export default async function FarmerDashboard() {
                         <span className="text-[10.5px] font-normal text-charcoal-400">
                           {formatNumber(order.quantity)} kg
                         </span>
-                        {order.isDemo ? <DemoTag /> : null}
+                        
                       </p>
                       <p className="text-[10.5px] text-charcoal-400">
                         {order.orderNo} · {order.buyer.name} · {formatDate(order.createdAt)}
@@ -398,7 +397,7 @@ export default async function FarmerDashboard() {
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-sage">Jump to</p>
             <div className="mt-2 grid grid-cols-2 gap-1.5">
               {[
-                { href: "/farmer/auctions", label: "Auctions", icon: Wheat },
+                // Live auctions are paused; the link returns when the flag is on.
                 { href: "/farmer/earnings", label: "Earnings", icon: Wallet },
                 { href: "/farmer/orders", label: "Orders", icon: ClipboardList },
                 { href: "/farmer/profile", label: "Farm profile", icon: Users },

@@ -16,7 +16,6 @@ export interface MapPoint {
   location: string;
   distance: number | null;
   href: string;
-  isDemo: boolean;
 }
 
 /**

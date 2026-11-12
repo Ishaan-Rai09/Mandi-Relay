@@ -2,7 +2,6 @@ import {
   BadgeIndianRupee,
   Bike,
   ClipboardList,
-  Gavel,
   Handshake,
   LayoutDashboard,
   ListOrdered,
@@ -36,7 +35,9 @@ export const NAV: Record<Role, { primary: NavItem[]; secondary: NavItem[] }> = {
       { href: "/farmer/voice-listing", label: "List by voice", icon: Mic, emphasis: true },
       { href: "/farmer/listings", label: "My produce", icon: Package },
       { href: "/farmer/offers", label: "Offers", icon: Handshake, badge: "offers" },
-      { href: "/farmer/auctions", label: "Auctions", icon: Gavel },
+      // Live auctions are paused (FEATURES.auctions). Re-enable both entries
+      // when NEXT_PUBLIC_ENABLE_AUCTIONS=true.
+      // { href: "/farmer/auctions", label: "Auctions", icon: Gavel },
       { href: "/farmer/orders", label: "Orders", icon: ClipboardList },
       { href: "/farmer/earnings", label: "Earnings", icon: Wallet },
     ],
@@ -47,7 +48,7 @@ export const NAV: Record<Role, { primary: NavItem[]; secondary: NavItem[] }> = {
       { href: "/buyer/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { href: "/buyer/marketplace", label: "Marketplace", icon: Store },
       { href: "/buyer/bids", label: "My offers", icon: Handshake, badge: "bids" },
-      { href: "/buyer/auctions", label: "Auctions", icon: Gavel },
+      // { href: "/buyer/auctions", label: "Auctions", icon: Gavel },
       { href: "/buyer/orders", label: "Orders", icon: ClipboardList },
     ],
     secondary: [{ href: "/buyer/profile", label: "Business profile", icon: Users }],

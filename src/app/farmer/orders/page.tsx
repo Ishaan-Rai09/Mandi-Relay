@@ -3,7 +3,7 @@ import { ClipboardList, Truck } from "lucide-react";
 
 import { TransportRequestButton } from "@/components/shared/transport-request";
 import { TransportQuotes } from "@/components/shared/transport-quotes";
-import { DemoTag, Panel, Pill } from "@/components/ui/panel";
+import { Panel, Pill } from "@/components/ui/panel";
 import { EmptyState, PageHeader, Stat } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -97,7 +97,7 @@ export default async function FarmerOrdersPage() {
                     <Pill tone={STATUS_TONE[order.status] ?? "neutral"}>
                       {order.status.replace("_", " ").toLowerCase()}
                     </Pill>
-                    {order.isDemo ? <DemoTag /> : null}
+                    
                     {order.auctionId ? <Pill tone="gold">from auction</Pill> : null}
                   </div>
                   <p className="text-[10.5px] text-charcoal-400">{formatDate(order.createdAt)}</p>

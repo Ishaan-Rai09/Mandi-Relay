@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowRight, Gavel } from "lucide-react";
 
 import { Countdown, LiveDot } from "@/components/marketplace/countdown";
 import { ButtonLink } from "@/components/ui/button";
-import { DemoTag, Panel, PanelHeader, Pill } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill } from "@/components/ui/panel";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { auctionsEnabled } from "@/lib/features";
 import { AUCTION_STATUS_LABEL, type AuctionStatus } from "@/lib/domain";
 import { highestBids, syncExpiredAuctions } from "@/lib/services/auctions";
 import { auctionLift } from "@/lib/services/pricing";
@@ -17,6 +19,8 @@ export const metadata: Metadata = { title: "Auctions" };
 export const dynamic = "force-dynamic";
 
 export default async function FarmerAuctionsPage() {
+  // Auctions are paused; the whole section is unreachable until re-enabled.
+  if (!auctionsEnabled) notFound();
   const user = await requireRole("FARMER");
   await syncExpiredAuctions();
 
@@ -77,7 +81,6 @@ export default async function FarmerAuctionsPage() {
                       </h2>
                       <p className="truncate text-[11px] text-charcoal-400">
                         {formatNumber(auction.quantity)} kg · {auction.listing.location}
-                        {auction.isDemo ? " · demo" : ""}
                       </p>
                     </div>
                     <div className="text-right">
@@ -123,7 +126,7 @@ export default async function FarmerAuctionsPage() {
                       <span className="text-[11px] font-normal text-charcoal-400">
                         {formatNumber(auction.quantity)} kg
                       </span>
-                      {auction.isDemo ? <DemoTag /> : null}
+                      
                     </p>
                     <p className="text-[10.5px] text-charcoal-400">
                       Ended {formatDateTime(auction.endsAt)} · {auction._count.bids} bid

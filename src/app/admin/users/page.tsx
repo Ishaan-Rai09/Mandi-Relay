@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { VerifyUserButton } from "@/components/admin/admin-actions";
-import { DemoTag, Panel, Pill } from "@/components/ui/panel";
+import { Panel, Pill } from "@/components/ui/panel";
 import { PageHeader } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -93,7 +93,7 @@ export default async function AdminUsersPage({
                   <td className="px-3.5 py-2.5">
                     <p className="flex items-center gap-1.5 font-medium text-charcoal">
                       {user.name}
-                      {user.isDemo ? <DemoTag /> : null}
+                      
                     </p>
                     <p className="text-[10.5px] text-charcoal-400">
                       {user.farm?.farmName ?? user.business?.businessName ?? "—"}

@@ -8,10 +8,11 @@ import { ListingEditor } from "@/components/farmer/listing-editor";
 import { OfferCard, type OfferView } from "@/components/farmer/offer-card";
 import { PriceReferencePanel } from "@/components/marketplace/price-reference";
 import { ButtonLink } from "@/components/ui/button";
-import { DemoTag, Panel, PanelHeader, Pill } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill } from "@/components/ui/panel";
 import { BackLink } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { auctionsEnabled } from "@/lib/features";
 import { LISTING_STATUS_LABEL, type ListingStatus } from "@/lib/domain";
 import { latestReference, priceHistory } from "@/lib/queries/listings";
 import { estimateTransportCost } from "@/lib/services/pricing";
@@ -66,7 +67,6 @@ export default async function FarmerListingPage({ params }: { params: Promise<{ 
       deliveryLocation: offer.deliveryLocation,
       requestsNegotiation: offer.requestsNegotiation,
       createdAt: offer.createdAt.toISOString(),
-      isDemo: offer.isDemo,
       buyer: {
         name: offer.buyer.name,
         businessName: offer.buyer.business?.businessName ?? null,
@@ -114,7 +114,7 @@ export default async function FarmerListingPage({ params }: { params: Promise<{ 
                 ? "In auction"
                 : LISTING_STATUS_LABEL[listing.status as ListingStatus]}
             </Pill>
-            {listing.isDemo ? <DemoTag /> : null}
+            
           </div>
           <h1 className="mt-2 font-display text-[26px] font-bold tracking-[-0.03em] text-charcoal">
             {listing.commodity}
@@ -182,6 +182,7 @@ export default async function FarmerListingPage({ params }: { params: Promise<{ 
         </div>
 
         <div className="space-y-4">
+          {auctionsEnabled ? (
           <Panel className="overflow-hidden">
             <PanelHeader
               title="Micro-auction"
@@ -216,6 +217,7 @@ export default async function FarmerListingPage({ params }: { params: Promise<{ 
               </p>
             )}
           </Panel>
+          ) : null}
 
           <PriceReferencePanel
             reference={reference}

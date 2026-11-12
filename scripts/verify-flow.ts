@@ -18,7 +18,7 @@ import { computeProceeds } from "../src/lib/services/pricing";
 import { formatINR, round2 } from "../src/lib/utils";
 
 const startedAt = new Date();
-const created = { listings: [] as string[], orders: [] as string[] };
+const created = { listings: [] as string[], orders: [] as string[], users: [] as string[] };
 
 let passed = 0;
 function check(label: string, fn: () => void) {
@@ -86,10 +86,27 @@ async function main() {
 
   /* ── 3. Offer → counter → accept → order ────────────────────────── */
   console.log("\n3. Offer, counteroffer and order creation");
-  const farmerA = await db.user.findUnique({ where: { phone: "+919810000001" } });
-  const retailer = await db.user.findUnique({ where: { phone: "+919810000011" } });
-  const category = await db.category.findFirst({ where: { slug: "vegetables" } });
-  assert.ok(farmerA && retailer && category, "seed data missing — run npm run db:seed");
+  // The database holds real accounts only, so the suite creates the parties it
+  // needs (with throwaway numbers) and removes them again in `cleanup`.
+  const stamp = Date.now().toString().slice(-7);
+  const makeUser = async (name: string, role: string, slot: string) => {
+    const user = await db.user.create({
+      data: { name, phone: `+919${slot}${stamp}`, role, language: "en", verified: true },
+    });
+    created.users.push(user.id);
+    return user;
+  };
+
+  const farmerA = await makeUser("Verify Farmer A", "FARMER", "00001");
+  const farmerB = await makeUser("Verify Farmer B", "FARMER", "00002");
+  const retailer = await makeUser("Verify Retailer", "BUYER", "00011");
+  const wholesaler = await makeUser("Verify Wholesaler", "BUYER", "00013");
+
+  const category = await db.category.upsert({
+    where: { slug: "vegetables" },
+    create: { slug: "vegetables", name: "Vegetables", nameHi: "सब्ज़ियाँ", sortOrder: 1 },
+    update: {},
+  });
 
   const listing = await db.listing.create({
     data: {
@@ -107,7 +124,6 @@ async function main() {
       lat: 30.746,
       lng: 76.647,
       status: "ACTIVE",
-      isDemo: true,
       source: "VOICE",
     },
   });
@@ -181,11 +197,7 @@ async function main() {
   check("offer above available stock rejected", () => undefined);
 
   /* ── 4. Auction rules ───────────────────────────────────────────── */
-  console.log("\n4. Micro-auction engine");
-  const farmerB = await db.user.findUnique({ where: { phone: "+919810000002" } });
-  const wholesaler = await db.user.findUnique({ where: { phone: "+919810000013" } });
-  assert.ok(farmerB && wholesaler);
-
+  console.log("\n4. Micro-auction engine (service layer, paused in the UI)");
   const auctionListing = await db.listing.create({
     data: {
       farmerId: farmerB.id,
@@ -202,8 +214,7 @@ async function main() {
       lat: 30.5544,
       lng: 76.7213,
       status: "ACTIVE",
-      isDemo: true,
-      source: "SEED",
+      source: "MANUAL",
     },
   });
   created.listings.push(auctionListing.id);
@@ -283,6 +294,9 @@ async function cleanup() {
   }
   await db.notification.deleteMany({ where: { createdAt: { gte: startedAt } } });
   await db.auditLog.deleteMany({ where: { createdAt: { gte: startedAt } } });
+  if (created.users.length > 0) {
+    await db.user.deleteMany({ where: { id: { in: created.users } } });
+  }
   void round2;
 }
 

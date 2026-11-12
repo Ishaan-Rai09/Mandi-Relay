@@ -73,7 +73,6 @@ export async function MarketplaceBrowser({
     location: item.location,
     distance: item.distance,
     href: `${detailBase}/${item.id}`,
-    isDemo: item.isDemo,
   }));
 
   return (
@@ -111,9 +110,6 @@ export async function MarketplaceBrowser({
         <p className="text-[11px] text-charcoal-400">
           Showing {result.items.length} of {result.total} matching lots
           {result.originLabel ? ` · distances measured from ${result.originLabel}` : ""}
-          {result.items.some((item) => item.isDemo)
-            ? " · lots marked Demo were created by the seed script"
-            : ""}
         </p>
       ) : null}
     </div>

@@ -2,16 +2,20 @@
  * Speech provider abstraction.
  *
  * Two seams exist:
- *  - STT: the browser Web Speech API (default, free, works on localhost/HTTPS)
- *    or a server endpoint that proxies a cloud STT vendor.
+ *  - STT: Gnani (Vachana Prisma) through `/api/voice/transcribe` (production),
+ *    with the browser Web Speech API as the no-key fallback.
  *  - TTS: the browser SpeechSynthesis API or a server endpoint.
  *
  * Both return the same shape so the UI never knows which provider answered.
- * Nothing here claims offline transcription: the Web Speech API requires a
- * network connection in Chrome.
+ * Nothing here claims offline transcription: every provider needs a network
+ * connection, and the Gnani key never leaves the server.
+ *
+ * Gnani's REST endpoint takes a multipart audio file (wav/mp3/ogg/flac/aac/m4a)
+ * up to 30 seconds, so the browser records, resamples to 16 kHz mono WAV and
+ * uploads. See `src/hooks/use-speech.ts`.
  */
 
-export type SpeechProvider = "browser" | "server";
+export type SpeechProvider = "browser" | "gnani";
 
 export interface TranscriptResult {
   text: string;
@@ -21,10 +25,25 @@ export interface TranscriptResult {
   provider: SpeechProvider;
 }
 
+function sttProvider(): SpeechProvider {
+  const value = (process.env.NEXT_PUBLIC_STT_PROVIDER ?? "gnani").toLowerCase();
+  // Everything except the explicit browser fallback goes through Gnani.
+  return value === "browser" ? "browser" : "gnani";
+}
+
 export const speechConfig = {
-  sttProvider: (process.env.NEXT_PUBLIC_STT_PROVIDER ?? "browser") as SpeechProvider,
-  ttsProvider: (process.env.NEXT_PUBLIC_TTS_PROVIDER ?? "browser") as SpeechProvider,
+  sttProvider: sttProvider(),
+  ttsProvider: (process.env.NEXT_PUBLIC_TTS_PROVIDER ?? "browser") as "browser" | "server",
 };
+
+/** Where the browser posts recorded audio for server-side transcription. */
+export const TRANSCRIBE_ENDPOINT = "/api/voice/transcribe";
+
+/**
+ * Gnani transcribes at most 30 seconds per REST request, so the recorder stops
+ * a little earlier. Longer speech is split into several turns by the UI.
+ */
+export const MAX_RECORDING_MS = 27_000;
 
 /** BCP-47 tags used by the Web Speech API for each supported language. */
 export const SPEECH_LOCALES: Record<string, string> = {
@@ -32,6 +51,17 @@ export const SPEECH_LOCALES: Record<string, string> = {
   hi: "hi-IN",
   pa: "pa-IN",
   auto: "hi-IN",
+};
+
+/**
+ * Gnani language codes. `indic-auto` (Prisma v3.0 only) lets the model identify
+ * the language itself and report it back as `detected_language_code`.
+ */
+export const GNANI_LANGUAGE_CODES: Record<string, string> = {
+  en: "en-IN",
+  hi: "hi-IN",
+  pa: "pa-IN",
+  auto: "indic-auto",
 };
 
 export function browserSpeechSupported(): boolean {

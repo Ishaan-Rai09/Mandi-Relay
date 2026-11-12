@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PackageSearch } from "lucide-react";
 
 import { QuoteForm } from "@/components/transporter/quote-form";
-import { DemoTag, Panel, Pill } from "@/components/ui/panel";
+import { Panel, Pill } from "@/components/ui/panel";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -82,7 +82,6 @@ export default async function TransporterRequestsPage() {
                     <p className="mt-0.5 text-[10.5px] text-charcoal-400">
                       Posted {timeAgo(request.createdAt)}
                       {request.pickupAt ? ` · pickup ${formatDateTime(request.pickupAt)}` : ""}
-                      {request.order?.isDemo ? "" : ""}
                     </p>
                     {request.notes ? (
                       <p className="mt-1.5 rounded-[4px] bg-ivory px-2 py-1 text-[11px] leading-relaxed text-charcoal-500">
@@ -97,9 +96,6 @@ export default async function TransporterRequestsPage() {
                   </div>
 
                   <div className="flex flex-col items-end gap-1">
-                    {myQuote ? (
-                      <DemoTag className="opacity-70" />
-                    ) : null}
                     <QuoteForm requestId={request.id} suggested={suggested} existing={myQuote?.amount ?? null} />
                   </div>
                 </div>

@@ -1,26 +1,29 @@
 // Mandi Relay — data model
 //
-// Local development runs on SQLite so the application is runnable with zero
-// external services. The production target is Supabase Postgres; the portable
-// Postgres DDL (with Row Level Security) lives in `supabase/schema.sql` and
-// mirrors this model. Enum-like columns are stored as strings so the same
-// model works on both engines; the canonical values live in `src/lib/domain.ts`.
+// One database: Supabase Postgres. Prisma owns the tables; Supabase owns
+// authentication (phone OTP) and the Row Level Security policies in
+// `supabase/policies.sql`. Enum-like columns are stored as strings so the model
+// stays portable across Postgres versions; the canonical values live in
+// `src/lib/domain.ts` and are validated in `src/lib/schemas.ts`.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id            String   @id @default(uuid())
+  // Supabase auth.users.id — the phone number proves this account.
+  authUserId    String?  @unique
   phone         String   @unique
   name          String
   role          String // FARMER | BUYER | TRANSPORTER | ADMIN
-  passwordHash  String
+  // Only the local development provider stores a password; Supabase users use OTP.
+  passwordHash  String?
   language      String   @default("en") // en | hi | pa
   email         String?
   state         String?
@@ -31,7 +34,6 @@ model User {
   avatarUrl     String?
   verified      Boolean  @default(false)
   verificationNote String?
-  isDemo        Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -133,8 +135,7 @@ model Listing {
   pickupOnly    Boolean  @default(false)
   status        String   @default("ACTIVE") // DRAFT | ACTIVE | RESERVED | SOLD | PAUSED
   moderationStatus String @default("APPROVED") // APPROVED | PENDING | REJECTED
-  isDemo        Boolean  @default(false)
-  source        String   @default("MANUAL") // MANUAL | VOICE | SEED
+  source        String   @default("MANUAL") // MANUAL | VOICE
   viewCount     Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -178,7 +179,6 @@ model Offer {
   status        String   @default("PENDING") // PENDING | COUNTERED | ACCEPTED | REJECTED | WITHDRAWN
   actorRole     String   @default("BUYER") // BUYER | FARMER
   parentOfferId String?
-  isDemo        Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -205,7 +205,6 @@ model Auction {
   pickupNote    String?
   buyerCriteria String?
   awardedBidId  String?
-  isDemo        Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -222,7 +221,6 @@ model Bid {
   buyerId   String
   amount    Float // price per unit
   quantity  Float
-  isDemo    Boolean  @default(false)
   createdAt DateTime @default(now())
 
   auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
@@ -248,7 +246,6 @@ model Order {
   status         String   @default("CONFIRMED") // CONFIRMED | IN_TRANSIT | DELIVERED | COMPLETED | CANCELLED
   pickupPreference String @default("PICKUP")
   notes          String?
-  isDemo         Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -263,24 +260,28 @@ model Order {
   @@index([buyerId, status])
 }
 
-// Reference prices are never presented as live transaction prices. `isSample`
-// marks clearly-labelled demonstration values used when no official feed is
-// configured.
+// Reference prices are never presented as live transaction prices. Rows come
+// from the official Agmarknet feed only; `source` records the agency and the
+// report date, and an empty table means "no quotation loaded" rather than an
+// invented number.
 model PriceReference {
   id         String   @id @default(uuid())
   commodity  String
   market     String
   district   String
   state      String
+  // Empty string rather than null so the compound unique key stays usable.
+  variety    String   @default("")
   minPrice   Float
   maxPrice   Float
   modalPrice Float
   unit       String   @default("quintal")
   reportDate DateTime
-  source     String   @default("Sample data — not an official quotation")
-  isSample   Boolean  @default(true)
+  source     String
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
+  @@unique([commodity, market, variety, reportDate])
   @@index([commodity, reportDate])
 }
 

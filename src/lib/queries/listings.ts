@@ -2,6 +2,7 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import { placeByName } from "@/lib/ai/extract";
+import { auctionsEnabled } from "@/lib/features";
 import { distanceKm } from "@/lib/utils";
 
 export interface MarketplaceFilters {
@@ -16,7 +17,6 @@ export interface MarketplaceFilters {
   availableBy?: string | null;
   origin?: { lat: number | null; lng: number | null } | null;
   limit?: number;
-  includeDemo?: boolean;
 }
 
 export interface ListingCardData {
@@ -40,7 +40,6 @@ export interface ListingCardData {
   gradeVerified: boolean;
   pickupOnly: boolean;
   status: string;
-  isDemo: boolean;
   createdAt: Date;
   farmer: {
     id: string;
@@ -134,7 +133,6 @@ export async function searchListings(filters: MarketplaceFilters): Promise<{
     gradeVerified: row.gradeVerified,
     pickupOnly: row.pickupOnly,
     status: row.status,
-    isDemo: row.isDemo,
     createdAt: row.createdAt,
     farmer: {
       id: row.farmer.id,
@@ -144,7 +142,8 @@ export async function searchListings(filters: MarketplaceFilters): Promise<{
       farmName: row.farmer.farm?.farmName ?? null,
     },
     distance: distanceKm(origin ?? {}, { lat: row.lat, lng: row.lng }),
-    auctionId: row.auction?.status === "LIVE" ? row.auction.id : null,
+    // Auctions are paused: no lot advertises a live auction link.
+    auctionId: auctionsEnabled && row.auction?.status === "LIVE" ? row.auction.id : null,
   }));
 
   if (origin && (filters.distance != null || filters.sort === "distance")) {

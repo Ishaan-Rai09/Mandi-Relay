@@ -4,10 +4,11 @@ import { Gavel, Info, Trophy } from "lucide-react";
 
 import { AwardBidButton, CloseAuctionButton, RefreshBids } from "@/components/farmer/auction-controls";
 import { Countdown, LiveDot } from "@/components/marketplace/countdown";
-import { DemoTag, Panel, PanelHeader, Pill, VerifiedBadge } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill, VerifiedBadge } from "@/components/ui/panel";
 import { BackLink } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { auctionsEnabled } from "@/lib/features";
 import { AUCTION_STATUS_LABEL, PLATFORM_FEE_RATE, type AuctionStatus } from "@/lib/domain";
 import { syncExpiredAuctions } from "@/lib/services/auctions";
 import { auctionLift } from "@/lib/services/pricing";
@@ -17,6 +18,7 @@ export const metadata: Metadata = { title: "Auction console" };
 export const dynamic = "force-dynamic";
 
 export default async function FarmerAuctionConsole({ params }: { params: Promise<{ id: string }> }) {
+  if (!auctionsEnabled) notFound();
   const { id } = await params;
   const user = await requireRole("FARMER");
   await syncExpiredAuctions();
@@ -52,7 +54,7 @@ export default async function FarmerAuctionConsole({ params }: { params: Promise
             <Pill tone={auction.status === "AWARDED" ? "success" : "gold"}>
               {AUCTION_STATUS_LABEL[auction.status as AuctionStatus]}
             </Pill>
-            {auction.isDemo ? <DemoTag /> : null}
+            
           </div>
           <h1 className="mt-2 font-display text-[26px] font-bold tracking-[-0.03em] text-charcoal">
             {auction.listing.commodity}
@@ -149,7 +151,7 @@ export default async function FarmerAuctionConsole({ params }: { params: Promise
                           <span className="text-[12.5px] font-medium text-charcoal">
                             {bid.buyer.business?.businessName ?? bid.buyer.name}
                           </span>
-                          {bid.isDemo ? <DemoTag /> : null}
+                          
                         </div>
                         <div className="mt-0.5 flex items-center gap-1.5">
                           <VerifiedBadge verified={bid.buyer.verified} />

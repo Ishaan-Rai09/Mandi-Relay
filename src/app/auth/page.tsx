@@ -7,10 +7,11 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { Wordmark } from "@/components/layout/wordmark";
 import { getSessionUser } from "@/lib/auth";
 import { ROLE_HOME, type Role } from "@/lib/domain";
+import { supabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to Mandi Relay — voice-first produce listings, offers and auctions.",
+  description: "Sign in to Mandi Relay — voice-first produce listings and direct offers.",
 };
 
 export default async function AuthPage({
@@ -74,7 +75,7 @@ export default async function AuthPage({
         </div>
 
         <p className="relative text-[10.5px] leading-relaxed text-ivory/35">
-          Prototype build for Punjab and the NCR corridor. Demonstration data is labelled.
+          Built for Punjab and the NCR corridor. Phone numbers are verified by one-time code.
           No financial transactions are processed.
         </p>
       </aside>
@@ -105,7 +106,12 @@ export default async function AuthPage({
             </p>
 
             <div className="mt-6">
-              <AuthForm initialMode={mode} initialRole={role} next={next} />
+              <AuthForm
+                initialMode={mode}
+                initialRole={role}
+                next={next}
+                phoneAuth={supabaseConfigured()}
+              />
             </div>
           </div>
         </div>

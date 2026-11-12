@@ -17,7 +17,7 @@ import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/field";
-import { DemoTag, Pill, VerifiedBadge } from "@/components/ui/panel";
+import { Pill, VerifiedBadge } from "@/components/ui/panel";
 import { respondOfferAction } from "@/lib/actions/offers";
 import { IDLE } from "@/lib/schemas";
 import { cn, formatINR, formatNumber, round2, timeAgo } from "@/lib/utils";
@@ -33,7 +33,6 @@ export interface OfferView {
   deliveryLocation: string | null;
   requestsNegotiation: boolean;
   createdAt: string;
-  isDemo: boolean;
   buyer: { name: string; businessName: string | null; verified: boolean; district: string | null };
   listing: {
     id: string;
@@ -102,7 +101,6 @@ export function OfferCard({ offer, viewer }: { offer: OfferView; viewer: "FARMER
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 truncate text-[12.5px] font-semibold text-charcoal">
               {offer.buyer.businessName ?? offer.buyer.name}
-              {offer.isDemo ? <DemoTag /> : null}
             </p>
             <p className="flex items-center gap-1.5 truncate text-[10.5px] text-charcoal-400">
               <VerifiedBadge verified={offer.buyer.verified} />

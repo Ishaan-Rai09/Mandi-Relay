@@ -104,15 +104,12 @@ export async function placeBid(input: PlaceBidInput) {
       );
     }
 
-    const buyer = await tx.user.findUnique({ where: { id: input.buyerId } });
-
     const bid = await tx.bid.create({
       data: {
         auctionId: auction.id,
         buyerId: input.buyerId,
         amount: round2(input.amount),
         quantity: auction.quantity,
-        isDemo: buyer?.isDemo ?? false,
       },
     });
 
@@ -195,7 +192,6 @@ export async function createAuction(input: CreateAuctionInput) {
       status: "LIVE",
       pickupNote: input.pickupNote?.trim() || null,
       buyerCriteria: input.buyerCriteria?.trim() || null,
-      isDemo: listing.isDemo,
     },
   });
 
@@ -256,7 +252,6 @@ export async function awardBid(auctionId: string, bidId: string, farmerId: strin
         pickupPreference: "PICKUP",
         status: "CONFIRMED",
         notes: "Created from micro-auction award",
-        isDemo: auction.isDemo || bid.buyer.isDemo,
       },
     });
 

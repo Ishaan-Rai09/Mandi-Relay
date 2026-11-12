@@ -20,7 +20,6 @@ export async function SiteHeader() {
           <Link href="/#how-it-works" className="transition-colors hover:text-charcoal">How it works</Link>
           <Link href="/#voice" className="transition-colors hover:text-charcoal">Voice listing</Link>
           <Link href="/marketplace-preview" className="transition-colors hover:text-charcoal">Marketplace</Link>
-          <Link href="/#auctions" className="transition-colors hover:text-charcoal">Auctions</Link>
           <Link href="/#trust" className="transition-colors hover:text-charcoal">Trust</Link>
         </nav>
 
@@ -59,7 +58,7 @@ export function SiteFooter() {
             buyers nearby, and decide with real numbers in front of you.
           </p>
           <p className="mt-4 text-[11.5px] leading-relaxed text-ivory/40">
-            Prototype build. Demonstration listings and bids are labelled as such.
+            Prototype build. Reference prices carry their official source and date.
             Prices are indicative references, not quotations. No payments are processed.
           </p>
         </div>
@@ -69,7 +68,6 @@ export function SiteFooter() {
           links={[
             { href: "/auth?mode=signup&role=farmer", label: "Start selling" },
             { href: "/#voice", label: "Voice listing" },
-            { href: "/#auctions", label: "Micro-auctions" },
             { href: "/farmer/dashboard", label: "Farmer dashboard" },
           ]}
         />
@@ -78,7 +76,6 @@ export function SiteFooter() {
           links={[
             { href: "/marketplace-preview", label: "Browse marketplace" },
             { href: "/auth?mode=signup&role=buyer", label: "Register as a buyer" },
-            { href: "/buyer/auctions", label: "Live auctions" },
             { href: "/buyer/orders", label: "Orders" },
           ]}
         />

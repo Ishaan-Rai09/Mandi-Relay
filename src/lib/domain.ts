@@ -171,7 +171,6 @@ export interface SessionUser {
   district: string | null;
   village: string | null;
   verified: boolean;
-  isDemo: boolean;
 }
 
 export const ROLE_HOME: Record<Role, string> = {

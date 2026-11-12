@@ -7,24 +7,33 @@ import { revalidatePath } from "next/cache";
 import {
   audit,
   createSession,
-  destroySession,
+  getAuthIdentity,
   hashPassword,
   requireUser,
+  signOutUser,
   verifyPassword,
 } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ROLE_HOME } from "@/lib/domain";
 import { rateLimit } from "@/lib/rate-limit";
+import { supabaseConfigured } from "@/lib/supabase/config";
 import {
   fieldErrors,
   normalisePhone,
   onboardingSchema,
+  phoneSignUpSchema,
   profileSchema,
   signInSchema,
   signUpSchema,
   type ActionState,
 } from "@/lib/schemas";
 import { parseJsonArray } from "@/lib/utils";
+
+/** Only internal, single-slash paths are accepted as a post-auth destination. */
+function safeNext(value: string | undefined | null): string | null {
+  if (!value) return null;
+  return value.startsWith("/") && !value.startsWith("//") ? value : null;
+}
 
 function splitList(value: string | undefined | null): string {
   return JSON.stringify(
@@ -36,10 +45,32 @@ function splitList(value: string | undefined | null): string {
   );
 }
 
+/**
+ * Phone numbers that become administrators on first sign-in.
+ * `ADMIN_PHONE_NUMBERS="+91981..., +91982..."` — comma separated, E.164 or
+ * local. Roles are never accepted from the client, so this list is the only
+ * way to mint an administrator (the demo seed used to do it).
+ */
+function isAdminPhone(phone: string): boolean {
+  const list = (process.env.ADMIN_PHONE_NUMBERS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) => normalisePhone(value));
+  return list.includes(phone);
+}
+
+/* ── Local development provider (no Supabase keys) ─────────────────── */
+
 export async function signInAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  // The password provider is a development convenience only.
+  if (supabaseConfigured()) {
+    return { ok: false, message: "Sign in with your phone number and the one-time code." };
+  }
+
   const parsed = signInSchema.safeParse({
     phone: formData.get("phone"),
     password: formData.get("password"),
@@ -81,6 +112,10 @@ export async function signUpAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (supabaseConfigured()) {
+    return { ok: false, message: "Create your account with a phone number and one-time code." };
+  }
+
   const parsed = signUpSchema.safeParse({
     name: formData.get("name"),
     phone: formData.get("phone"),
@@ -113,7 +148,7 @@ export async function signUpAction(
     data: {
       name: parsed.data.name,
       phone,
-      role: parsed.data.role,
+      role: isAdminPhone(phone) ? "ADMIN" : parsed.data.role,
       passwordHash: hashPassword(parsed.data.password),
       language: parsed.data.language,
     },
@@ -121,14 +156,99 @@ export async function signUpAction(
 
   await createSession(user.id);
   await audit(user.id, "SIGN_UP", "user", user.id, { role: user.role });
-  redirect("/onboarding");
+  redirect(isAdminPhone(phone) ? ROLE_HOME.ADMIN : "/onboarding");
 }
 
 export async function signOutAction() {
   const user = await requireUser().catch(() => null);
   if (user) await audit(user.id, "SIGN_OUT", "user", user.id);
-  await destroySession();
+  await signOutUser();
   redirect("/");
+}
+
+/* ── Supabase phone OTP ────────────────────────────────────────────── */
+
+/**
+ * Called by the browser immediately after `verifyOtp()` succeeds, when the
+ * Supabase session cookie already exists. It maps that proven phone number onto
+ * the application's own user row: existing users are signed in, new ones are
+ * created with the role they chose on the form.
+ */
+export async function completePhoneAuthAction(input: {
+  mode: "signin" | "signup";
+  name?: string;
+  role?: string;
+  language?: string;
+  next?: string;
+}): Promise<ActionState & { destination?: string }> {
+  const identity = await getAuthIdentity();
+  if (!identity?.authUserId) {
+    return { ok: false, message: "Verify your phone number again — the session expired." };
+  }
+
+  const existing = await db.user.findFirst({
+    where: {
+      OR: [{ authUserId: identity.authUserId }, { phone: identity.phone }],
+    },
+  });
+
+  if (existing) {
+    if (existing.authUserId !== identity.authUserId) {
+      await db.user.update({
+        where: { id: existing.id },
+        data: { authUserId: identity.authUserId },
+      });
+    }
+    await audit(existing.id, "SIGN_IN", "user", existing.id);
+    return {
+      ok: true,
+      destination: safeNext(input.next) ?? ROLE_HOME[existing.role as keyof typeof ROLE_HOME],
+    };
+  }
+
+  if (input.mode !== "signup") {
+    // Do not leave a verified-but-profileless session behind.
+    await signOutUser();
+    return {
+      ok: false,
+      message: "That number is not registered yet. Choose “Create account” to join.",
+    };
+  }
+
+  const parsed = phoneSignUpSchema.safeParse({
+    name: input.name,
+    role: input.role,
+    language: input.language ?? "hi",
+  });
+  if (!parsed.success) {
+    return { ok: false, errors: fieldErrors(parsed.error) };
+  }
+
+  const limit = rateLimit(`signup:${identity.phone}`, 4, 600);
+  if (!limit.allowed) {
+    return { ok: false, message: "Too many sign-up attempts. Please try again shortly." };
+  }
+
+  // A phone on the operator allowlist is an administrator, whatever the form
+  // said. Everyone else keeps the role they chose.
+  const admin = isAdminPhone(identity.phone);
+
+  const user = await db.user.create({
+    data: {
+      authUserId: identity.authUserId,
+      phone: identity.phone,
+      name: parsed.data.name,
+      role: admin ? "ADMIN" : parsed.data.role,
+      language: parsed.data.language,
+      // The one-time code proved control of this number.
+      verified: true,
+    },
+  });
+
+  await audit(user.id, "SIGN_UP", "user", user.id, { role: user.role, provider: "phone-otp" });
+
+  // Administrators have no farm, business or vehicle to describe.
+  return { ok: true, destination: admin ? ROLE_HOME.ADMIN : "/onboarding" };
 }
 
 /** Completes the profile collected during onboarding. */

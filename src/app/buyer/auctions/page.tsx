@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowRight, Gavel } from "lucide-react";
 
 import { Countdown, LiveDot } from "@/components/marketplace/countdown";
 import { ButtonLink } from "@/components/ui/button";
-import { DemoTag, Panel, PanelHeader, Pill } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill } from "@/components/ui/panel";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { auctionsEnabled } from "@/lib/features";
 import { AUCTION_STATUS_LABEL, type AuctionStatus } from "@/lib/domain";
 import { highestBids, syncExpiredAuctions } from "@/lib/services/auctions";
 import { auctionLift } from "@/lib/services/pricing";
@@ -17,6 +19,7 @@ export const metadata: Metadata = { title: "Auctions" };
 export const dynamic = "force-dynamic";
 
 export default async function BuyerAuctionsPage() {
+  if (!auctionsEnabled) notFound();
   const user = await requireRole("BUYER");
   await syncExpiredAuctions();
 
@@ -105,7 +108,7 @@ export default async function BuyerAuctionsPage() {
 
                   <div className="mt-2 flex items-center gap-2">
                     <Pill tone="neutral">+{auctionLift(current, auction.startingPrice).toFixed(0)}% lift</Pill>
-                    {auction.isDemo ? <DemoTag /> : null}
+                    
                   </div>
 
                   <div className="mt-3 flex items-center justify-between border-t border-ivory-200 pt-2.5">

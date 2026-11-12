@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
-import { DemoTag, Panel, PanelHeader, Pill } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill } from "@/components/ui/panel";
 import { PageHeader, Stat } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { auctionsEnabled } from "@/lib/features";
 import { formatDate, formatINR, formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Transactions" };
@@ -18,11 +19,13 @@ export default async function AdminTransactionsPage() {
       orderBy: { createdAt: "desc" },
       take: 60,
     }),
-    db.auction.findMany({
-      include: { listing: true, farmer: true, _count: { select: { bids: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    }),
+    auctionsEnabled
+      ? db.auction.findMany({
+          include: { listing: true, farmer: true, _count: { select: { bids: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        })
+      : Promise.resolve([]),
     db.deliveryRequest.findMany({
       include: { requester: true, quotes: true },
       orderBy: { createdAt: "desc" },
@@ -40,7 +43,7 @@ export default async function AdminTransactionsPage() {
       <PageHeader
         eyebrow="Administration"
         title="Transactions"
-        description="Confirmed orders, auctions and transport activity. No funds are held or moved by the platform in this build."
+        description="Confirmed orders and transport activity. No funds are held or moved by the platform in this build."
       />
 
       <Panel className="grid grid-cols-2 divide-ivory-200 lg:grid-cols-4 lg:divide-x">
@@ -59,7 +62,7 @@ export default async function AdminTransactionsPage() {
       </Panel>
 
       <Panel>
-        <PanelHeader title="Orders" description="Newest first, including demonstration records." />
+        <PanelHeader title="Orders" description="Newest first." />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left">
             <thead>
@@ -89,7 +92,7 @@ export default async function AdminTransactionsPage() {
                   <tr key={order.id} className="text-[11.5px] hover:bg-ivory/50">
                     <td className="px-3 py-2 font-mono text-[10.5px] text-charcoal">
                       {order.orderNo}
-                      {order.isDemo ? <DemoTag className="ml-1" /> : null}
+                      
                     </td>
                     <td className="px-3 py-2 text-charcoal-500">{order.listing.commodity}</td>
                     <td className="px-3 py-2 text-charcoal-500">
@@ -117,6 +120,7 @@ export default async function AdminTransactionsPage() {
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">
+        {auctionsEnabled ? (
         <Panel>
           <PanelHeader title="Auctions" />
           <ul className="divide-y divide-ivory-100">
@@ -145,6 +149,7 @@ export default async function AdminTransactionsPage() {
             )}
           </ul>
         </Panel>
+        ) : null}
 
         <Panel>
           <PanelHeader title="Transport requests" />

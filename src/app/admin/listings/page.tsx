@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import { ModerateListingButton } from "@/components/admin/admin-actions";
-import { DemoTag, Panel, Pill } from "@/components/ui/panel";
+import { Panel, Pill } from "@/components/ui/panel";
 import { PageHeader } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -94,7 +94,7 @@ export default async function AdminListingsPage({
                         {listing.commodity}
                       </Link>
                       <span className="ml-1.5 text-[10.5px] text-charcoal-400">{listing.category.name}</span>
-                      {listing.isDemo ? <DemoTag className="ml-1.5" /> : null}
+                      
                     </td>
                     <td className="px-3.5 py-2.5 text-charcoal-500">
                       {listing.farmer.name}

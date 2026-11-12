@@ -181,7 +181,6 @@ export async function respondToOffer(input: RespondInput) {
         netToFarmer: proceeds.net,
         pickupPreference: offer.pickupPreference,
         status: "CONFIRMED",
-        isDemo: offer.isDemo || buyer?.isDemo || false,
       },
     });
 
@@ -246,8 +245,6 @@ export async function createOffer(params: {
     throw new OfferError("That price looks like a typo — please check the amount.");
   }
 
-  const buyer = await db.user.findUnique({ where: { id: params.buyerId } });
-
   const offer = await db.offer.create({
     data: {
       listingId: params.listingId,
@@ -260,7 +257,6 @@ export async function createOffer(params: {
       requestsNegotiation: params.requestsNegotiation ?? false,
       status: "PENDING",
       actorRole: "BUYER",
-      isDemo: buyer?.isDemo ?? false,
     },
   });
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { auctionsEnabled } from "@/lib/features";
 import { latestReference, priceHistory } from "@/lib/queries/listings";
 
 /** Loads everything a listing detail page needs in one pass. */
@@ -53,7 +54,6 @@ export async function getListingDetail(id: string) {
       gradeVerified: listing.gradeVerified,
       pickupOnly: listing.pickupOnly,
       status: listing.status,
-      isDemo: listing.isDemo,
       createdAt: listing.createdAt,
       category: { slug: listing.category.slug, name: listing.category.name },
       farmer: {
@@ -66,13 +66,14 @@ export async function getListingDetail(id: string) {
         sizeAcres: listing.farmer.farm?.sizeAcres ?? null,
         createdAt: listing.farmer.createdAt,
       },
-      auction: listing.auction
-        ? {
-            id: listing.auction.id,
-            status: listing.auction.status,
-            endsAt: listing.auction.endsAt,
-          }
-        : null,
+      auction:
+        auctionsEnabled && listing.auction
+          ? {
+              id: listing.auction.id,
+              status: listing.auction.status,
+              endsAt: listing.auction.endsAt,
+            }
+          : null,
     },
     reference,
     history,

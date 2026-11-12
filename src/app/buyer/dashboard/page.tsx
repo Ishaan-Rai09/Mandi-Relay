@@ -11,6 +11,7 @@ import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { BUSINESS_TYPE_LABEL, type BusinessType } from "@/lib/domain";
 import { searchListings } from "@/lib/queries/listings";
+import { auctionsEnabled } from "@/lib/features";
 import { highestBids, syncExpiredAuctions } from "@/lib/services/auctions";
 import { formatDate, formatINR, formatNumber, parseJsonArray } from "@/lib/utils";
 
@@ -19,7 +20,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BuyerDashboard() {
   const user = await requireRole("BUYER");
-  await syncExpiredAuctions();
+  if (auctionsEnabled) await syncExpiredAuctions();
 
   const [profile, businessProfile, offers, orders, auctions] = await Promise.all([
     db.user.findUnique({ where: { id: user.id } }),
@@ -36,12 +37,14 @@ export default async function BuyerDashboard() {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
-    db.auction.findMany({
-      where: { status: "LIVE" },
-      include: { listing: true, _count: { select: { bids: true } } },
-      orderBy: { endsAt: "asc" },
-      take: 3,
-    }),
+    auctionsEnabled
+      ? db.auction.findMany({
+          where: { status: "LIVE" },
+          include: { listing: true, _count: { select: { bids: true } } },
+          orderBy: { endsAt: "asc" },
+          take: 3,
+        })
+      : Promise.resolve([]),
   ]);
 
   const preferred = parseJsonArray(businessProfile?.preferredCommodities);
@@ -93,9 +96,11 @@ export default async function BuyerDashboard() {
         <div className="border-l border-ivory-200 p-4 sm:border-l-0">
           <Stat label="Orders" value={orders.length} sub={`${formatINR(spend)} committed`} />
         </div>
-        <div className="border-t border-ivory-200 p-4 sm:border-t-0">
-          <Stat label="Live auctions" value={auctions.length} sub="across the region" />
-        </div>
+        {auctionsEnabled ? (
+          <div className="border-t border-ivory-200 p-4 sm:border-t-0">
+            <Stat label="Live auctions" value={auctions.length} sub="across the region" />
+          </div>
+        ) : null}
         <div className="border-l border-t border-ivory-200 p-4 sm:border-l-0 sm:border-t-0">
           <Stat label="Lots on market" value={market.total} sub="active listings" />
         </div>
@@ -236,6 +241,7 @@ export default async function BuyerDashboard() {
         </div>
 
         <div className="space-y-5">
+          {auctionsEnabled ? (
           <Panel>
             <PanelHeader title="Auctions closing soon" />
             {auctions.length === 0 ? (
@@ -269,6 +275,7 @@ export default async function BuyerDashboard() {
               </ul>
             )}
           </Panel>
+          ) : null}
 
           <Panel className="p-4">
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-sage">

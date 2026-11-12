@@ -5,9 +5,10 @@ import { ListingCard } from "@/components/marketplace/listing-card";
 import { OfferForm } from "@/components/marketplace/offer-form";
 import { PriceReferencePanel, type ReferenceRow } from "@/components/marketplace/price-reference";
 import { ProduceTile } from "@/components/ui/produce-art";
-import { DemoTag, Panel, Pill, VerifiedBadge } from "@/components/ui/panel";
+import { Panel, Pill, VerifiedBadge } from "@/components/ui/panel";
 import { BackLink } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
+import { auctionsEnabled } from "@/lib/features";
 import type { ListingCardData } from "@/lib/queries/listings";
 import { cn, formatDate, formatINR, formatNumber, timeAgo } from "@/lib/utils";
 
@@ -31,7 +32,6 @@ export interface ListingDetailData {
   gradeVerified: boolean;
   pickupOnly: boolean;
   status: string;
-  isDemo: boolean;
   createdAt: Date;
   category: { slug: string; name: string };
   farmer: { id: string; name: string; verified: boolean; village: string | null; district: string | null; farmName: string | null; sizeAcres: number | null; createdAt: Date };
@@ -70,10 +70,9 @@ export function ListingDetail({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Pill tone="forest">{listing.category.name}</Pill>
-                {listing.isDemo ? <DemoTag /> : null}
                 {listing.status === "RESERVED" ? <Pill tone="gold">Reserved</Pill> : null}
                 {closed ? <Pill tone="neutral">Sold out</Pill> : null}
-                {listing.auction?.status === "LIVE" ? (
+                {auctionsEnabled && listing.auction?.status === "LIVE" ? (
                   <Pill tone="gold" dot>
                     Live auction
                   </Pill>
@@ -209,7 +208,7 @@ export function ListingDetail({
             </Panel>
           </section>
 
-          {listing.auction?.status === "LIVE" ? (
+          {auctionsEnabled && listing.auction?.status === "LIVE" ? (
             <section className="mt-6">
               <Panel className="flex flex-wrap items-center justify-between gap-3 border-gold/40 bg-gold-50 p-3.5">
                 <div className="flex items-center gap-2">
@@ -268,8 +267,8 @@ export function ListingDetail({
             {isOwner ? (
               <div className="mt-3 space-y-2">
                 <p className="text-[12.5px] leading-relaxed text-charcoal-500">
-                  This is your own lot. Open the farmer workspace to edit it, run an auction or
-                  review incoming offers.
+                  This is your own lot. Open the farmer workspace to edit it or review incoming
+                  offers.
                 </p>
                 <ButtonLink href="/farmer/listings" size="sm" className="w-full">
                   Manage listing
@@ -338,7 +337,6 @@ export function toReferenceRow(row: {
   modalPrice: number;
   reportDate: Date;
   source: string;
-  isSample: boolean;
 }): ReferenceRow {
   return {
     commodity: row.commodity,
@@ -348,7 +346,6 @@ export function toReferenceRow(row: {
     modalPrice: row.modalPrice,
     reportDate: row.reportDate,
     source: row.source,
-    isSample: row.isSample,
   };
 }
 

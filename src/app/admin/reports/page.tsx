@@ -20,7 +20,7 @@ export default async function AdminReportsPage() {
     db.listing.findMany({ include: { category: true } }),
     db.offer.findMany({ select: { status: true, pricePerUnit: true } }),
     db.order.findMany({ include: { listing: true } }),
-    db.user.findMany({ select: { role: true, verified: true, isDemo: true, createdAt: true } }),
+    db.user.findMany({ select: { role: true, verified: true, createdAt: true } }),
     db.priceReference.findMany({ orderBy: { reportDate: "desc" } }),
     db.deliveryRequest.findMany({ select: { status: true } }),
   ]);
@@ -77,14 +77,17 @@ export default async function AdminReportsPage() {
 
   const notGrade = listings.filter((listing) => !listing.grade).length;
   const noCoords = listings.filter((listing) => listing.lat == null).length;
-  const sampleRates = references.filter((reference) => reference.isSample).length;
+  const referenceSources = new Map<string, number>();
+  for (const reference of references) {
+    referenceSources.set(reference.source, (referenceSources.get(reference.source) ?? 0) + 1);
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-4">
       <PageHeader
         eyebrow="Administration"
         title="Reports"
-        description="Derived from stored records only. With a seeded dataset these describe the prototype, not the Indian market."
+        description="Derived from stored records only — no estimates, no sample rows."
       />
 
       <Panel className="grid grid-cols-2 divide-ivory-200 lg:grid-cols-4 lg:divide-x">
@@ -162,7 +165,7 @@ export default async function AdminReportsPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel>
-          <PanelHeader title="Realisation against reference" description="Confirmed order prices compared with the latest sample modal price" />
+          <PanelHeader title="Realisation against reference" description="Confirmed order prices compared with the latest reported modal price" />
           {realisation.length === 0 ? (
             <p className="px-4 py-5 text-[12px] leading-relaxed text-charcoal-400">
               No confirmed orders for commodities with a loaded reference price yet.
@@ -204,8 +207,7 @@ export default async function AdminReportsPage() {
               { label: "Listings without a stated grade", value: notGrade, tone: "neutral" as const },
               { label: "Listings without coordinates", value: noCoords, tone: "neutral" as const },
               { label: "Unverified accounts", value: users.filter((user) => !user.verified).length, tone: "warning" as const },
-              { label: "Demonstration accounts", value: users.filter((user) => user.isDemo).length, tone: "neutral" as const },
-              { label: "Sample price reference rows", value: sampleRates, tone: "warning" as const },
+              { label: "Price reference rows", value: references.length, tone: references.length ? "success" as const : "warning" as const },
               { label: "Median account age (days)", value: medianAgeDays, tone: "neutral" as const },
               { label: "Transport requests", value: deliveryRequests.length, tone: "neutral" as const },
             ].map((row) => (
@@ -219,9 +221,11 @@ export default async function AdminReportsPage() {
       </div>
 
       <p className="text-[11px] leading-relaxed text-charcoal-400">
-        Price references in this environment are sample rows in Agmarknet format (
-        {sampleRates} rows), not official quotations. Connecting an official feed replaces the
-        sample flag and keeps the source and report date on every row.
+        {references.length === 0
+          ? "No reference prices are loaded. Run `npm run prices:sync` with an AGMARKNET_API_KEY to load official quotations."
+          : `Reference prices come from the official feed: ${Array.from(referenceSources.entries())
+              .map(([source, count]) => `${source} (${count})`)
+              .join(", ")}. Every row keeps its source and report date.`}
       </p>
     </div>
   );

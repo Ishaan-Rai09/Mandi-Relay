@@ -5,10 +5,11 @@ import { Gavel, Info, Trophy } from "lucide-react";
 import { BidPanel } from "@/components/buyer/bid-panel";
 import { Countdown, LiveDot } from "@/components/marketplace/countdown";
 import { ProduceTile } from "@/components/ui/produce-art";
-import { DemoTag, Panel, PanelHeader, Pill } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill } from "@/components/ui/panel";
 import { BackLink } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { auctionsEnabled } from "@/lib/features";
 import { AUCTION_STATUS_LABEL, type AuctionStatus } from "@/lib/domain";
 import { syncExpiredAuctions } from "@/lib/services/auctions";
 import { auctionLift } from "@/lib/services/pricing";
@@ -24,6 +25,7 @@ function bidderLabel(name: string, district: string | null, isYou: boolean) {
 }
 
 export default async function BuyerAuctionPage({ params }: { params: Promise<{ id: string }> }) {
+  if (!auctionsEnabled) notFound();
   const { id } = await params;
   const user = await requireRole("BUYER");
   await syncExpiredAuctions();
@@ -68,7 +70,7 @@ export default async function BuyerAuctionPage({ params }: { params: Promise<{ i
                 <Pill tone={auction.status === "AWARDED" ? "success" : "gold"}>
                   {AUCTION_STATUS_LABEL[auction.status as AuctionStatus]}
                 </Pill>
-                {auction.isDemo ? <DemoTag /> : null}
+                
                 <Pill tone="neutral">
                   +{auctionLift(current, auction.startingPrice).toFixed(0)}% above floor
                 </Pill>
@@ -142,7 +144,7 @@ export default async function BuyerAuctionPage({ params }: { params: Promise<{ i
                       <div className="min-w-0">
                         <p className="truncate text-[12.5px] font-medium text-charcoal">
                           {bidderLabel(bid.buyer.name, bid.buyer.district, bid.buyerId === user.id)}
-                          {bid.isDemo ? <DemoTag className="ml-1.5" /> : null}
+                          
                         </p>
                         <p className="text-[10.5px] text-charcoal-400">{timeAgo(bid.createdAt)}</p>
                       </div>

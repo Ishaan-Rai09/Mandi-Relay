@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { assertRole, audit } from "@/lib/auth";
+import { auctionsEnabled } from "@/lib/features";
 import {
   AuctionError,
   awardBid,
@@ -12,10 +13,14 @@ import {
 } from "@/lib/services/auctions";
 import { auctionSchema, bidSchema, fieldErrors, type ActionState } from "@/lib/schemas";
 
+/** Message returned by every auction action while the feature is paused. */
+const PAUSED = "Live auctions are paused. Nothing can be created, bid on or awarded.";
+
 export async function createAuctionAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (!auctionsEnabled) return { ok: false, message: PAUSED };
   const user = await assertRole("FARMER").catch(() => null);
   if (!user) return { ok: false, message: "Sign in as a farmer to run an auction." };
 
@@ -50,6 +55,7 @@ export async function createAuctionAction(
 }
 
 export async function placeBidAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  if (!auctionsEnabled) return { ok: false, message: PAUSED };
   const user = await assertRole("BUYER").catch(() => null);
   if (!user) return { ok: false, message: "Sign in as a buyer to place a bid." };
 
@@ -78,6 +84,7 @@ export async function placeBidAction(_prev: ActionState, formData: FormData): Pr
 }
 
 export async function awardBidAction(auctionId: string, bidId: string) {
+  if (!auctionsEnabled) return { ok: false, message: PAUSED };
   const user = await assertRole("FARMER").catch(() => null);
   if (!user) return { ok: false, message: "Sign in as a farmer." };
   try {
@@ -96,6 +103,7 @@ export async function awardBidAction(auctionId: string, bidId: string) {
 }
 
 export async function closeAuctionAction(auctionId: string) {
+  if (!auctionsEnabled) return { ok: false, message: PAUSED };
   const user = await assertRole("FARMER").catch(() => null);
   if (!user) return { ok: false, message: "Sign in as a farmer." };
   try {

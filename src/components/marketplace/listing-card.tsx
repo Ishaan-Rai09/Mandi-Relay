@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowUpRight, Gavel, MapPin, Truck } from "lucide-react";
 
 import { ProduceTile } from "@/components/ui/produce-art";
-import { DemoTag, Pill, VerifiedBadge } from "@/components/ui/panel";
+import { Pill, VerifiedBadge } from "@/components/ui/panel";
+import { auctionsEnabled } from "@/lib/features";
 import type { ListingCardData } from "@/lib/queries/listings";
 import { cn, formatDate, formatINR, formatNumber, timeAgo } from "@/lib/utils";
 
@@ -35,7 +36,7 @@ export function ListingCard({
             className="aspect-[4/3] w-full"
           />
           <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-            {listing.auctionId ? (
+            {auctionsEnabled && listing.auctionId ? (
               <span className="inline-flex items-center gap-1 rounded-[3px] bg-gold px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-charcoal shadow-sm">
                 <Gavel className="size-3" aria-hidden /> Auction
               </span>
@@ -50,9 +51,6 @@ export function ListingCard({
                 Sold out
               </span>
             ) : null}
-          </div>
-          <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5">
-            {listing.isDemo ? <DemoTag className="bg-ivory/95 backdrop-blur" /> : null}
           </div>
           {listing.distance != null ? (
             <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-[3px] bg-white/92 px-1.5 py-0.5 text-[10.5px] font-medium text-charcoal-500 backdrop-blur">

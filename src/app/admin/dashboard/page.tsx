@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Activity, ArrowRight, Gavel, ShieldCheck, Truck, Users } from "lucide-react";
+import { Activity, ArrowRight, ShieldCheck, Truck, Users } from "lucide-react";
 
-import { DemoTag, Panel, PanelHeader, Pill } from "@/components/ui/panel";
+import { Panel, PanelHeader, Pill } from "@/components/ui/panel";
 import { PageHeader, Stat } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -19,7 +19,6 @@ export default async function AdminDashboard() {
     listings,
     offers,
     orders,
-    auctions,
     deliveries,
     pendingModeration,
     unverified,
@@ -30,7 +29,6 @@ export default async function AdminDashboard() {
     db.listing.groupBy({ by: ["status"], _count: { _all: true } }),
     db.offer.count(),
     db.order.findMany({ select: { grossValue: true, platformFee: true, netToFarmer: true, status: true } }),
-    db.auction.groupBy({ by: ["status"], _count: { _all: true } }),
     db.deliveryRequest.groupBy({ by: ["status"], _count: { _all: true } }),
     db.listing.count({ where: { moderationStatus: "PENDING" } }),
     db.user.count({ where: { verified: false } }),
@@ -40,7 +38,6 @@ export default async function AdminDashboard() {
 
   const userCount = (role: string) => users.find((row) => row.role === role)?._count._all ?? 0;
   const listingCount = (status: string) => listings.find((row) => row.status === status)?._count._all ?? 0;
-  const liveAuctions = auctions.find((row) => row.status === "LIVE")?._count._all ?? 0;
   const gmv = orders.reduce((sum, order) => sum + order.grossValue, 0);
   const fees = orders.reduce((sum, order) => sum + order.platformFee, 0);
   const openLoads = deliveries
@@ -52,7 +49,7 @@ export default async function AdminDashboard() {
       <PageHeader
         eyebrow="Administration"
         title="Platform overview"
-        description="Operational state of the marketplace. Demonstration records are counted separately wherever it matters."
+        description="Operational state of the marketplace, computed from stored records only."
       />
 
       <Panel className="grid grid-cols-2 divide-ivory-200 lg:grid-cols-4 lg:divide-x">
@@ -119,7 +116,6 @@ export default async function AdminDashboard() {
             <PanelHeader title="Operations" />
             <ul className="divide-y divide-ivory-100 text-[12px]">
               {[
-                { label: "Live auctions", value: liveAuctions, href: "/admin/transactions", icon: Gavel },
                 { label: "Open transport loads", value: openLoads, href: "/admin/transactions", icon: Truck },
                 { label: "Unverified accounts", value: unverified, href: "/admin/users", icon: Users },
                 { label: "Paused / rejected lots", value: listingCount("PAUSED"), href: "/admin/listings", icon: Activity },
@@ -150,7 +146,7 @@ export default async function AdminDashboard() {
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
-                    {user.isDemo ? <DemoTag /> : null}
+                    
                     <Pill tone={user.verified ? "success" : "neutral"}>
                       {user.verified ? "Verified" : "Unverified"}
                     </Pill>
@@ -168,7 +164,7 @@ export default async function AdminDashboard() {
       </div>
 
       <p className="text-[11px] leading-relaxed text-charcoal-400">
-        Counts include the seeded demonstration dataset. {formatNumber(orders.length)} orders worth{" "}
+        {formatNumber(orders.length)} orders worth{" "}
         {formatINR(gmv)} is prototype activity, not real market volume.
       </p>
     </div>

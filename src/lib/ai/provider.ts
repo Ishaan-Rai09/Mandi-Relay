@@ -50,6 +50,12 @@ const llmSchema = z.object({
   follow_up_question: z.string().nullable(),
 });
 
+/** Some models wrap JSON in a fenced block; strip it before parsing. */
+function stripFences(text: string): string {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return (fenced ? fenced[1] : text).trim();
+}
+
 const SYSTEM_PROMPT = `You extract produce listings from a farmer's spoken sentence in English, Hindi, Punjabi or Hinglish.
 Return JSON only. Rules:
 - Never invent values. Use null when the farmer did not say it.
@@ -78,30 +84,39 @@ export async function understandListing(
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 12_000);
-    const res = await fetch(`${aiConfig.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${aiConfig.apiKey}`,
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: `CURRENT_TIME: ${new Date().toISOString()}\nFARMER_DEFAULT_LOCATION: ${JSON.stringify({
+          location: defaults.location ?? null,
+          district: defaults.district ?? null,
+          state: defaults.state ?? null,
+        })}\nSENTENCE: ${transcript}`,
       },
-      body: JSON.stringify({
-        model: aiConfig.model,
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `CURRENT_TIME: ${new Date().toISOString()}\nFARMER_DEFAULT_LOCATION: ${JSON.stringify({
-              location: defaults.location ?? null,
-              district: defaults.district ?? null,
-              state: defaults.state ?? null,
-            })}\nSENTENCE: ${transcript}`,
-          },
-        ],
-      }),
-      signal: controller.signal,
-    });
+    ];
+
+    const ask = (jsonMode: boolean) =>
+      fetch(`${aiConfig.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${aiConfig.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: aiConfig.model,
+          temperature: 0,
+          ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+          messages,
+        }),
+        signal: controller.signal,
+      });
+
+    let res = await ask(true);
+    // Not every OpenAI-compatible model accepts JSON mode — several NVIDIA NIM
+    // models reject it with a 400 — so retry once without it instead of
+    // dropping straight to the rules engine.
+    if (res.status === 400) res = await ask(false);
     clearTimeout(timer);
     if (!res.ok) return fallback;
 
@@ -111,7 +126,7 @@ export async function understandListing(
     const content = payload.choices?.[0]?.message?.content;
     if (!content) return fallback;
 
-    const parsed = llmSchema.safeParse(JSON.parse(content));
+    const parsed = llmSchema.safeParse(JSON.parse(stripFences(content)));
     if (!parsed.success) return fallback;
     const d = parsed.data;
 

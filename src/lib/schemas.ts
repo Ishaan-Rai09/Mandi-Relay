@@ -26,6 +26,16 @@ export const signUpSchema = z.object({
   language: z.enum(LANGUAGES).default("hi"),
 });
 
+/**
+ * Sign-up after a Supabase phone OTP. Supabase proves the number, so there is
+ * no password here — only the profile fields the application owns.
+ */
+export const phoneSignUpSchema = z.object({
+  name: z.string().trim().min(2, "Enter your full name").max(80),
+  role: z.enum(["FARMER", "BUYER", "TRANSPORTER"]),
+  language: z.enum(LANGUAGES).default("hi"),
+});
+
 export const onboardingSchema = z.object({
   language: z.enum(LANGUAGES),
   state: z.string().trim().min(2, "Select your state"),

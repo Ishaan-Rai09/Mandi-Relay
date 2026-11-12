@@ -329,12 +329,14 @@ export function VoiceStudio({
                   level={speech.level}
                   onToggle={() => {
                     if (speech.listening) {
-                      speech.stop();
-                      const captured = `${speech.transcript} ${speech.interim}`.trim();
-                      if (captured.length > 3) {
-                        setTranscript(captured);
-                        void runExtraction(captured);
-                      }
+                      // Resolves with the final text: immediately for the browser
+                      // recogniser, after the upload for Gnani.
+                      void speech.stop().then((captured) => {
+                        if (captured.length > 3) {
+                          setTranscript(captured);
+                          void runExtraction(captured);
+                        }
+                      });
                     } else {
                       speech.reset();
                       setPhase("listening");
@@ -344,11 +346,14 @@ export function VoiceStudio({
                   label={
                     phase === "processing"
                       ? "Extracting…"
-                      : speech.listening
-                        ? "Tap to stop and extract"
-                        : "Tap to speak"
+                      : speech.transcribing
+                        ? "Transcribing your sentence…"
+                        : speech.listening
+                          ? "Tap to stop and extract"
+                          : "Tap to speak"
                   }
-                  disabled={busy}
+                  transcribing={speech.transcribing}
+                  disabled={busy || speech.transcribing}
                 />
               ) : (
                 <div className="w-full">

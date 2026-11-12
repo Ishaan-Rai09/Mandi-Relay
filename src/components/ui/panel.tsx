@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
-import { BadgeCheck, FlaskConical } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
 
 /** A bordered surface. Used deliberately — not every section is a card. */
 export function Panel({
@@ -89,21 +89,6 @@ export function Pill({
     >
       {dot ? <span className="size-1.5 rounded-full bg-current" aria-hidden /> : null}
       {children}
-    </span>
-  );
-}
-
-export function DemoTag({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-[3px] border border-dashed border-sage/60 bg-ivory px-1.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-sage",
-        className,
-      )}
-      title="This record is demonstration data created by the seed script, not real market activity."
-    >
-      <FlaskConical className="size-3" aria-hidden />
-      Demo
     </span>
   );
 }

@@ -75,7 +75,6 @@ export async function loadFarmerDashboard(userId: string) {
       deliveryLocation: offer.deliveryLocation,
       requestsNegotiation: offer.requestsNegotiation,
       createdAt: offer.createdAt.toISOString(),
-      isDemo: offer.isDemo,
       buyer: {
         name: offer.buyer.name,
         businessName: offer.buyer.business?.businessName ?? null,

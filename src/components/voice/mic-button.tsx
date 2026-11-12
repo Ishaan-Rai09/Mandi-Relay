@@ -1,12 +1,13 @@
 "use client";
 
-import { Mic, MicOff, Square } from "lucide-react";
+import { Loader2, Mic, MicOff, Square } from "lucide-react";
 
 import { ListeningRings, Waveform } from "@/components/voice/waveform";
 import { cn } from "@/lib/utils";
 
 export function MicButton({
   listening,
+  transcribing,
   level,
   onToggle,
   disabled,
@@ -14,6 +15,8 @@ export function MicButton({
   label,
 }: {
   listening: boolean;
+  /** Uploading to the speech service: the recording has stopped, text has not arrived. */
+  transcribing?: boolean;
   level: number;
   onToggle: () => void;
   disabled?: boolean;
@@ -31,7 +34,10 @@ export function MicButton({
           onClick={onToggle}
           disabled={disabled}
           aria-pressed={listening}
-          aria-label={listening ? "Stop recording" : "Start voice input"}
+          aria-busy={transcribing}
+          aria-label={
+            transcribing ? "Transcribing" : listening ? "Stop recording" : "Start voice input"
+          }
           className={cn(
             "relative grid place-items-center rounded-full transition-all duration-300 disabled:opacity-40",
             dimension,
@@ -40,7 +46,9 @@ export function MicButton({
               : "bg-white text-forest-700 shadow-[var(--shadow-e2)] ring-1 ring-forest/15 hover:ring-forest/35 hover:shadow-[var(--shadow-e3)]",
           )}
         >
-          {listening ? (
+          {transcribing ? (
+            <Loader2 className={size === "lg" ? "size-8 animate-spin" : "size-6 animate-spin"} aria-hidden />
+          ) : listening ? (
             <Square className={size === "lg" ? "size-7" : "size-5"} fill="currentColor" strokeWidth={0} />
           ) : (
             <Mic className={size === "lg" ? "size-9" : "size-6"} strokeWidth={1.7} />
@@ -53,7 +61,12 @@ export function MicButton({
         ) : null}
       </div>
       {label ? (
-        <p className={cn("text-[12px] font-medium", listening ? "text-forest-700" : "text-charcoal-400")}>
+        <p
+          className={cn(
+            "text-[12px] font-medium",
+            listening ? "text-forest-700" : transcribing ? "text-charcoal-500" : "text-charcoal-400",
+          )}
+        >
           {label}
         </p>
       ) : null}

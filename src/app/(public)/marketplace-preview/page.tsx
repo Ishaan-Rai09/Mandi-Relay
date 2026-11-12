@@ -40,9 +40,8 @@ export default async function MarketplacePreviewPage({
       <div className="mt-5 flex items-start gap-2 rounded-[6px] border border-info/20 bg-info-soft px-3.5 py-2.5">
         <Info className="mt-0.5 size-4 shrink-0 text-info" aria-hidden />
         <p className="text-[11.5px] leading-relaxed text-charcoal-500">
-          Read-only preview. Lots marked <span className="font-semibold text-sage">Demo</span> are
-          sample records from the seed script; price references are labelled sample data in
-          Agmarknet format, not official quotations.
+          Read-only preview of lots published by registered farmers. Reference prices come from
+          the official Agmarknet feed and describe a market, not a completed transaction.
         </p>
       </div>
 

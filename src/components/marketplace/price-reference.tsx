@@ -11,13 +11,13 @@ export interface ReferenceRow {
   modalPrice: number;
   reportDate: Date;
   source: string;
-  isSample: boolean;
 }
 
 /**
- * Compares the farmer's ask with the latest published reference price. The
+ * Compares the farmer's ask with the latest official reference price. The
  * reference is per quintal; the ask is per kg, so it is converted before the
- * gap is shown. Sample data is labelled in the footer of the panel.
+ * gap is shown. The source and report date stay on screen so a quotation is
+ * never mistaken for a transaction price.
  */
 export function PriceReferencePanel({
   reference,
@@ -139,8 +139,7 @@ export function PriceReferencePanel({
       <div className="flex items-start gap-1.5 border-t border-ivory-200 bg-ivory px-3 py-2 text-[10.5px] leading-relaxed text-charcoal-400">
         <Info className="mt-0.5 size-3 shrink-0" aria-hidden />
         <span>
-          Reported {formatDate(reference.reportDate)} · {reference.source}
-          {reference.isSample ? " · sample data, not an official quotation" : ""}. Reference prices
+          {reference.source} · reported {formatDate(reference.reportDate)}. Reference prices
           describe a market, not a completed transaction.
         </span>
       </div>

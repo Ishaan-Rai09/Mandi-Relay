@@ -4,7 +4,7 @@ import { Gavel, Mic, Package, Plus } from "lucide-react";
 
 import { ListingActions } from "@/components/farmer/listing-actions";
 import { ButtonLink } from "@/components/ui/button";
-import { DemoTag, Panel, Pill } from "@/components/ui/panel";
+import { Panel, Pill } from "@/components/ui/panel";
 import { EmptyState, PageHeader } from "@/components/ui/misc";
 import { requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -130,7 +130,7 @@ export default async function FarmerListingsPage({
                         {listing.commodity}
                       </Link>
                       <span className="ml-1.5 text-[10.5px] text-charcoal-400">{listing.location}</span>
-                      {listing.isDemo ? <DemoTag className="ml-1.5" /> : null}
+                      
                       <p className="text-[10.5px] text-charcoal-400">
                         {listing.category.name}
                         {listing.variety ? ` · ${listing.variety}` : ""}

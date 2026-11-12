@@ -31,6 +31,7 @@ import { db } from "@/lib/db";
 import { searchListings } from "@/lib/queries/listings";
 import { formatINR, formatNumber, parseJsonArray, timeAgo } from "@/lib/utils";
 import { BUSINESS_TYPE_LABEL, type BusinessType } from "@/lib/domain";
+import { auctionsEnabled } from "@/lib/features";
 import { highestBids } from "@/lib/services/auctions";
 
 export const dynamic = "force-dynamic";
@@ -38,15 +39,17 @@ export const dynamic = "force-dynamic";
 async function loadLandingData() {
   const [market, auction, refs, buyers, categories] = await Promise.all([
     searchListings({ limit: 6, sort: "newest" }),
-    db.auction.findFirst({
-      where: { status: "LIVE" },
-      orderBy: { endsAt: "asc" },
-      include: {
-        listing: { include: { category: true, farmer: true } },
-        bids: { orderBy: { amount: "desc" }, take: 1, include: { buyer: true } },
-        _count: { select: { bids: true } },
-      },
-    }),
+    auctionsEnabled
+      ? db.auction.findFirst({
+          where: { status: "LIVE" },
+          orderBy: { endsAt: "asc" },
+          include: {
+            listing: { include: { category: true, farmer: true } },
+            bids: { orderBy: { amount: "desc" }, take: 1, include: { buyer: true } },
+            _count: { select: { bids: true } },
+          },
+        })
+      : Promise.resolve(null),
     db.priceReference.findMany({
       where: { reportDate: { gte: new Date(Date.now() - 36 * 60 * 60 * 1000) } },
       orderBy: [{ commodity: "asc" }, { reportDate: "desc" }],
@@ -208,7 +211,7 @@ export default async function LandingPage() {
                 {
                   n: "03",
                   title: "Compare and close",
-                  body: "See each offer against the mandi reference price and the transport cost, then accept, counter or run a micro-auction.",
+                  body: "See each offer against the mandi reference price and the transport cost, then accept, counter or decline it.",
                   icon: Gavel,
                 },
               ].map((step, index) => (
@@ -276,9 +279,8 @@ export default async function LandingPage() {
                 {market.total > 0 ? `${market.total} produce lots open right now.` : "The marketplace opens with the first lot."}
               </h2>
               <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-charcoal-500">
-                Every card below is a real database record. Records created by the demo seed
-                are marked <span className="font-semibold text-sage">Demo</span> so nothing is
-                mistaken for live market activity.
+                Every card below is a real database record published by a farmer. Nothing on
+                this page is placeholder inventory.
               </p>
             </div>
             <ButtonLink href="/marketplace-preview" variant="outline" size="sm" icon={<ArrowRight className="size-3.5" />}>
@@ -339,7 +341,7 @@ export default async function LandingPage() {
                 dashboard and ranks the match by distance, category and business type.
               </p>
               <ul className="mt-5 space-y-2.5">
-                <CheckRow>Buyers bid on lots; farmers never chase unknown numbers</CheckRow>
+                <CheckRow>Buyers come to the lot; farmers never chase unknown numbers</CheckRow>
                 <CheckRow>Distance and transport estimates shown before acceptance</CheckRow>
                 <CheckRow>Contact details stay masked until an order is confirmed</CheckRow>
               </ul>
@@ -355,7 +357,7 @@ export default async function LandingPage() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-charcoal-500">
                   Registered buyer requirements
                 </p>
-                <span className="text-[10.5px] text-charcoal-400">Demonstration accounts</span>
+                <span className="text-[10.5px] text-charcoal-400">From verified profiles</span>
               </div>
               <ul className="divide-y divide-ivory-200">
                 {buyers.length === 0 ? (
@@ -402,7 +404,8 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ──────────────────── Auctions ──────────────────── */}
+      {/* ──────────────────── Auctions (paused) ──────────────────── */}
+      {auctionsEnabled ? (
       <section id="auctions" className="border-b border-ivory-300">
         <div className="container-x py-14 sm:py-18">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
@@ -421,7 +424,7 @@ export default async function LandingPage() {
                   <CheckRow>Start price, minimum increment and closing time set by the farmer</CheckRow>
                   <CheckRow>No bids accepted after the clock runs out</CheckRow>
                   <CheckRow>Awarding a bid creates the order; closing alone does not</CheckRow>
-                  <CheckRow>Competing bids in this build come from labelled demo accounts</CheckRow>
+                  <CheckRow>The farmer keeps the choice to award, re-list or walk away</CheckRow>
                 </ul>
               </div>
             </Reveal>
@@ -486,9 +489,7 @@ export default async function LandingPage() {
                       <ButtonLink href="/buyer/auctions" size="sm" variant="gold">
                         View and bid
                       </ButtonLink>
-                      <span className="text-[10.5px] text-charcoal-400">
-                        Sign in required · demo bids are labelled
-                      </span>
+                      <span className="text-[10.5px] text-charcoal-400">Sign in required</span>
                     </div>
                   </div>
                 </Panel>
@@ -504,6 +505,7 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+      ) : null}
 
       {/* ──────────────────── Price references ──────────────────── */}
       <section id="prices" className="border-b border-ivory-300 bg-white">
@@ -568,7 +570,7 @@ export default async function LandingPage() {
                       {latestRefs.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="px-3 py-8 text-center text-[12.5px] text-charcoal-400">
-                            No reference data loaded. Run the seed script.
+                            No reference prices loaded yet. They appear once the official feed is synced.
                           </td>
                         </tr>
                       ) : null}
@@ -599,7 +601,7 @@ export default async function LandingPage() {
                   <CheckRow>See every offer ranked by what actually reaches you</CheckRow>
                   <CheckRow>Transport cost estimated before you accept</CheckRow>
                   <CheckRow>Your phone number stays private until an order exists</CheckRow>
-                  <CheckRow>Keep full control: accept, counter, auction or hold</CheckRow>
+                  <CheckRow>Keep full control: accept, counter, decline or hold</CheckRow>
                 </ul>
                 <div className="mt-6 grid grid-cols-3 gap-3 border-t border-ivory-300 pt-5">
                   <Stat label="Per-offer view" value="Net" sub="after fee and freight" tone="forest" />
@@ -620,7 +622,7 @@ export default async function LandingPage() {
                   <CheckRow>Search by voice: “200 kg onions within 30 km of Mohali”</CheckRow>
                   <CheckRow>Send a binding offer with quantity, price and pickup terms</CheckRow>
                   <CheckRow>Counter directly with the farmer, in one thread</CheckRow>
-                  <CheckRow>Bid on timed auctions through the server-validated engine</CheckRow>
+                  <CheckRow>Every offer is validated on the server before it reaches a farmer</CheckRow>
                 </ul>
                 <div className="mt-6 grid grid-cols-3 gap-3 border-t border-ivory-300 pt-5">
                   <Stat label="Listing freshness" value="Live" sub="shown per card" />
@@ -647,8 +649,9 @@ export default async function LandingPage() {
                 </h2>
                 <p className="mt-4 max-w-md text-[14px] leading-relaxed text-ivory/65">
                   This build does not invent testimonials, partnerships or transaction volumes.
-                  Sample data is labelled, quality grades are attributed to the seller unless
-                  independently checked, and no money moves through the prototype.
+                  Quality grades are attributed to the seller unless independently checked,
+                  reference prices carry their official source and date, and no money moves
+                  through the platform.
                 </p>
               </div>
             </Reveal>
