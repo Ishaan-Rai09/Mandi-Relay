@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function BuyerProductPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireRole("BUYER");
   const { id } = await params;
-  const detail = await getListingDetail(id);
+  const detail = await getListingDetail(id, { userId: user.id, role: user.role });
   if (!detail) notFound();
 
   return (

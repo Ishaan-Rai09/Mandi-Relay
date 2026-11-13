@@ -1,8 +1,8 @@
 // Mandi Relay — data model
 //
-// One database: Supabase Postgres. Prisma owns the tables; Supabase owns
-// authentication (phone OTP) and the Row Level Security policies in
-// `supabase/policies.sql`. Enum-like columns are stored as strings so the model
+// One database: Supabase Postgres (plain Postgres — no Supabase Auth). Prisma
+// owns the tables and `src/lib/auth.ts` owns identity: email + password, or
+// Google OAuth. Enum-like columns are stored as strings so the model
 // stays portable across Postgres versions; the canonical values live in
 // `src/lib/domain.ts` and are validated in `src/lib/schemas.ts`.
 
@@ -17,15 +17,19 @@ datasource db {
 
 model User {
   id            String   @id @default(uuid())
-  // Supabase auth.users.id — the phone number proves this account.
-  authUserId    String?  @unique
-  phone         String   @unique
+  // The sign-in identity. Always present: password accounts set it on the
+  // form, Google accounts get it from the verified Google profile.
+  email         String   @unique
+  // scrypt hash. Null for accounts that only ever signed in with Google.
+  passwordHash  String?
+  // Google's stable subject id once that account has been linked.
+  googleId      String?  @unique
+  // Contact number, collected at onboarding. Not a sign-in credential, so it
+  // is optional in the database until the profile is filled in.
+  phone         String?  @unique
   name          String
   role          String // FARMER | BUYER | TRANSPORTER | ADMIN
-  // Only the local development provider stores a password; Supabase users use OTP.
-  passwordHash  String?
-  language      String   @default("en") // en | hi | pa
-  email         String?
+  language      String   @default("en") // any of the 22 Eighth Schedule languages | en
   state         String?
   district      String?
   village       String?
@@ -53,6 +57,7 @@ model User {
   deliveries      Delivery[]           @relation("TransporterDeliveries")
   auditLogs       AuditLog[]
   sessions        Session[]
+  resetTokens     PasswordResetToken[]
 
   @@index([role])
   @@index([district])
@@ -400,6 +405,22 @@ model Session {
   userAgent String?
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// A single-use password reset link. Only the SHA-256 of the token is stored, so
+// a leaked database row cannot be turned back into a working link. One live
+// token per account: asking for a new link deletes the previous one.
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

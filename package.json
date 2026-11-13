@@ -7,14 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:local": "docker start mandi-pg || docker run --name mandi-pg -e POSTGRES_PASSWORD=mandi -e POSTGRES_DB=mandi -p 5433:5432 -d postgres:16-alpine",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
     "prices:sync": "node --import tsx scripts/sync-market-prices.ts",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
-    "verify": "node --import tsx --conditions=react-server scripts/verify-flow.ts"
+    "verify": "node --import tsx --conditions=react-server scripts/verify-flow.ts",
+    "verify:reset": "node --import tsx --conditions=react-server scripts/verify-reset.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
@@ -22,8 +22,6 @@
     "@fontsource-variable/noto-sans-devanagari": "^5.3.0",
     "@fontsource-variable/noto-sans-gurmukhi": "^5.3.0",
     "@prisma/client": "6.19.3",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.119.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^14.12.0",

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { distanceKm, parseJsonArray } from "@/lib/utils";
+import { distanceKm, maskPhone, parseJsonArray } from "@/lib/utils";
 
 export interface BuyerMatch {
   userId: string;
@@ -80,7 +80,7 @@ export async function findRelevantBuyers(
       matchScore: Math.round(score),
       matchedOn,
       verified: buyer.verified,
-      phoneMasked: maskPhoneLocal(buyer.phone),
+      phoneMasked: maskPhone(buyer.phone),
     };
   });
 
@@ -88,11 +88,6 @@ export async function findRelevantBuyers(
     .filter((b) => b.matchScore > 0)
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, limit);
-}
-
-function maskPhoneLocal(phone: string) {
-  const digits = phone.replace(/\D/g, "");
-  return digits.length >= 4 ? `••••• ${digits.slice(-4)}` : "••••";
 }
 
 /** Ranks listings for a buyer requirement (used by the buyer dashboard). */

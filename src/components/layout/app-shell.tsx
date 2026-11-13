@@ -2,12 +2,15 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Bell, CircleAlert } from "lucide-react";
 
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { MobileNav, SidebarNav } from "@/components/layout/app-nav";
+import { ROLE_ACCENT } from "@/components/layout/nav-config";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { UserMenu } from "@/components/layout/user-menu";
 import { Wordmark } from "@/components/layout/wordmark";
 import { db } from "@/lib/db";
-import { ROLE_LABEL, type SessionUser } from "@/lib/domain";
+import type { SessionUser } from "@/lib/domain";
+import { getI18n } from "@/lib/i18n";
 
 async function loadCounts(user: SessionUser) {
   const [offers, bids, deliveries] = await Promise.all([
@@ -49,6 +52,7 @@ export async function AppShell({
   ]);
 
   const profileIncomplete = !user.district || !user.village;
+  const { t } = await getI18n();
 
   return (
     <div className="min-h-dvh bg-ivory">
@@ -62,7 +66,7 @@ export async function AppShell({
           </div>
           <div className="mx-4 rounded-[5px] border border-ivory-200 bg-ivory px-2.5 py-1.5">
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-sage">
-              {ROLE_LABEL[user.role]}
+              {t(ROLE_ACCENT[user.role].labelKey)}
             </p>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -74,7 +78,7 @@ export async function AppShell({
               className="flex items-center justify-between rounded-[5px] px-2.5 py-2 text-[12.5px] font-medium text-charcoal-500 transition-colors hover:bg-charcoal/[0.04] hover:text-charcoal"
             >
               <span className="flex items-center gap-2">
-                <Bell className="size-3.5" aria-hidden /> Notifications
+                <Bell className="size-3.5" aria-hidden /> {t("nav.notifications")}
               </span>
               {unread > 0 ? (
                 <span className="rounded-full bg-gold px-1.5 text-[10.5px] font-semibold leading-[18px] text-charcoal tabular">
@@ -83,8 +87,11 @@ export async function AppShell({
               ) : null}
             </Link>
             <p className="mt-1 px-2.5 text-[10.5px] leading-relaxed text-charcoal-400">
-              Voice needs microphone permission.
+              {t("shell.voicePermission")}
             </p>
+            <div className="mt-2 px-1">
+              <LanguageSwitcher className="w-full justify-between" />
+            </div>
           </div>
         </aside>
 
@@ -97,7 +104,7 @@ export async function AppShell({
                   <Wordmark compact />
                 </Link>
                 <span className="rounded-[3px] border border-ivory-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-sage">
-                  {ROLE_LABEL[user.role]}
+                  {t(ROLE_ACCENT[user.role].labelKey)}
                 </span>
               </div>
 
@@ -107,10 +114,11 @@ export async function AppShell({
               </div>
 
               <div className="flex items-center gap-1.5">
+                <LanguageSwitcher className="hidden sm:inline-flex" />
                 <Link
                   href="/notifications"
                   className="relative grid size-9 place-items-center rounded-[5px] text-charcoal-500 transition-colors hover:bg-charcoal/[0.05] hover:text-charcoal"
-                  aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+                  aria-label={unread > 0 ? `${t("nav.notifications")}, ${unread}` : t("nav.notifications")}
                 >
                   <Bell className="size-[17px]" strokeWidth={1.9} />
                   {unread > 0 ? (
@@ -133,7 +141,7 @@ export async function AppShell({
                   href="/onboarding"
                   className="text-[12.5px] font-semibold text-forest-700 underline decoration-forest/30 underline-offset-2 hover:decoration-forest"
                 >
-                  Complete profile
+                  {t("shell.completeProfile")}
                 </Link>
               </div>
             ) : null}

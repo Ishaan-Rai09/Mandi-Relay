@@ -13,31 +13,56 @@ const password = z
   .min(8, "Use at least 8 characters")
   .max(72, "That password is too long");
 
+/** Any language the interface offers (22 Eighth Schedule languages + English). */
+const language = z
+  .string()
+  .trim()
+  .refine((value) => LANGUAGES.includes(value), "Choose one of the supported languages");
+
+const email = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(5, "Enter your email address")
+  .max(160, "That email address is too long")
+  .regex(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, "Enter a valid email address");
+
 export const signInSchema = z.object({
-  phone: phone,
+  email,
   password: z.string().min(1, "Enter your password"),
 });
 
+/** Step one of a reset: just the address to send the link to. */
+export const requestResetSchema = z.object({ email });
+
+/** Step two: the token from the link plus the new password, twice. */
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().trim().min(20, "That reset link is not valid").max(200),
+    password,
+    confirmPassword: z.string().min(1, "Repeat the new password"),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    message: "Both passwords must be the same",
+    path: ["confirmPassword"],
+  });
+
 export const signUpSchema = z.object({
   name: z.string().trim().min(2, "Enter your full name").max(80),
-  phone: phone,
+  email,
   password: password,
+  phone: phone,
   role: z.enum(["FARMER", "BUYER", "TRANSPORTER"]),
-  language: z.enum(LANGUAGES).default("hi"),
-});
-
-/**
- * Sign-up after a Supabase phone OTP. Supabase proves the number, so there is
- * no password here — only the profile fields the application owns.
- */
-export const phoneSignUpSchema = z.object({
-  name: z.string().trim().min(2, "Enter your full name").max(80),
-  role: z.enum(["FARMER", "BUYER", "TRANSPORTER"]),
-  language: z.enum(LANGUAGES).default("hi"),
+  language: language.default("en"),
 });
 
 export const onboardingSchema = z.object({
-  language: z.enum(LANGUAGES),
+  language,
+  // Contact number, not a sign-in credential: collected here so buyers and
+  // farmers have a way to reach each other once an order exists.
+  phone: phone,
+  // Google accounts arrive without a chosen role, so onboarding can set it.
+  role: z.enum(["FARMER", "BUYER", "TRANSPORTER"]).optional(),
   state: z.string().trim().min(2, "Select your state"),
   district: z.string().trim().min(2, "Enter your district"),
   village: z.string().trim().min(2, "Enter your village, town or city"),
@@ -128,7 +153,7 @@ export const deliveryQuoteSchema = z.object({
 
 export const profileSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  language: z.enum(LANGUAGES),
+  language,
   state: z.string().trim().min(2).max(80),
   district: z.string().trim().min(2).max(80),
   village: z.string().trim().min(2).max(80),

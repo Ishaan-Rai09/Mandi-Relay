@@ -1,51 +1,42 @@
 import "server-only";
 
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { ROLE_HOME, type Language, type Role, type SessionUser } from "@/lib/domain";
-import { supabaseConfigured } from "@/lib/supabase/config";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 /**
  * Identity and authorisation.
  *
- * Two providers share one public surface, so every page and action keeps
- * calling `getSessionUser()`, `requireRole()` and `assertRole()`:
+ * One mechanism, two ways in:
+ *   • email + password — scrypt hash in `User.passwordHash`
+ *   • Google OAuth — `User.googleId`, linked in /api/auth/google/callback
  *
- *  - Supabase (production): phone-number OTP. Supabase owns the session cookie
- *    and refreshes it; this module only maps `auth.users.id` / phone onto the
- *    application's own `User` row, which is where roles and profiles live.
- *  - Local (development, no Supabase keys): a database-backed session cookie
- *    with a scrypt password. Never used once Supabase is configured.
+ * Both end here: a random token in an httpOnly cookie (`mr_session`), stored in
+ * the `Session` table with an expiry. Nothing is trusted from the client except
+ * that opaque token, and every page and server action resolves the user through
+ * `getSessionUser()`, so a forged cookie reaches a redirect, never data.
  *
- * The local primitives stay exported because they are the fallback's whole
- * implementation and because the verification script signs in with them.
+ * Supabase Auth is deliberately not used: no phone OTP, no `auth.uid()`, no
+ * provider session to refresh. The database is plain Postgres.
  */
 
 const COOKIE_NAME = "mr_session";
 const SESSION_DAYS = 30;
 
-/* ── Local provider primitives ─────────────────────────────────────── */
+/* ── Passwords ─────────────────────────────────────────────────────── */
 
-export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const derived = scryptSync(password, salt, 64).toString("hex");
-  return `scrypt$${salt}$${derived}`;
+export { hashPassword, verifyPassword } from "@/lib/password";
+
+/** Emails are stored and compared lower-cased; anything else is a bug. */
+export function normaliseEmail(raw: string) {
+  return raw.trim().toLowerCase();
 }
 
-export function verifyPassword(password: string, stored: string | null): boolean {
-  if (!stored) return false;
-  const [scheme, salt, hash] = stored.split("$");
-  if (scheme !== "scrypt" || !salt || !hash) return false;
-  const derived = scryptSync(password, salt, 64);
-  const expected = Buffer.from(hash, "hex");
-  if (expected.length !== derived.length) return false;
-  return timingSafeEqual(derived, expected);
-}
+/* ── Sessions ──────────────────────────────────────────────────────── */
 
 export async function createSession(userId: string) {
   const token = randomBytes(32).toString("hex");
@@ -82,55 +73,11 @@ export async function destroySession() {
 
 /* ── Identity ──────────────────────────────────────────────────────── */
 
-/** Who the caller is, before we know whether they finished signing up. */
-export interface AuthIdentity {
-  /** Supabase `auth.users.id`; null on the local provider. */
-  authUserId: string | null;
-  /** E.164 phone number proven by the provider. */
-  phone: string;
-}
-
-export const authProvider = supabaseConfigured() ? "supabase" : "local";
-
-/**
- * Resolves the caller's identity from whichever provider is configured.
- * Cached per request: a page with several server components asks once.
- */
-export const getAuthIdentity = cache(async (): Promise<AuthIdentity | null> => {
-  if (supabaseConfigured()) {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    // A phone-OTP user always has a phone. Email-only users are not part of
-    // this product, so they are treated as unidentified.
-    const phone = user.phone ?? (user.user_metadata?.phone as string | undefined) ?? "";
-    if (!phone) return null;
-    return { authUserId: user.id, phone: normalisePhone(phone) };
-  }
-
-  const jar = await cookies();
-  const token = jar.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-
-  const session = await db.session.findUnique({
-    where: { token },
-    select: { id: true, expiresAt: true, user: { select: { phone: true } } },
-  });
-  if (!session) return null;
-  if (session.expiresAt.getTime() < Date.now()) {
-    await db.session.delete({ where: { id: session.id } }).catch(() => undefined);
-    return null;
-  }
-  return { authUserId: null, phone: session.user.phone };
-});
-
 function toSessionUser(u: {
   id: string;
   name: string;
-  phone: string;
+  email: string;
+  phone: string | null;
   role: string;
   language: string;
   state: string | null;
@@ -141,7 +88,10 @@ function toSessionUser(u: {
   return {
     id: u.id,
     name: u.name,
-    phone: u.phone,
+    email: u.email,
+    // Contact number is optional until onboarding finishes; an empty string
+    // keeps every caller's `maskPhone` graceful instead of widening the type.
+    phone: u.phone ?? "",
     role: u.role as Role,
     language: u.language as Language,
     state: u.state,
@@ -152,30 +102,29 @@ function toSessionUser(u: {
 }
 
 /**
- * The signed-in application user. Null when the caller is anonymous *or* has
- * proven a phone number but has not created a profile yet — that state is what
- * `/onboarding` resolves.
+ * The signed-in application user, or null. Cached per request: a page with
+ * several server components resolves the session once.
+ *
+ * Expired sessions are deleted on sight, so a cookie that outlives its row can
+ * never be replayed.
  */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
-  const identity = await getAuthIdentity();
-  if (!identity) return null;
+  const jar = await cookies();
+  const token = jar.get(COOKIE_NAME)?.value;
+  if (!token) return null;
 
-  const row = await db.user.findFirst({
-    where: identity.authUserId
-      ? { OR: [{ authUserId: identity.authUserId }, { phone: identity.phone }] }
-      : { phone: identity.phone },
+  const session = await db.session.findUnique({
+    where: { token },
+    select: { id: true, expiresAt: true, user: true },
   });
-  if (!row) return null;
+  if (!session) return null;
 
-  // First sign-in after a phone change, or a row created before the Supabase
-  // id was stored: bind them together now so later lookups are a single field.
-  if (identity.authUserId && row.authUserId !== identity.authUserId) {
-    await db.user
-      .update({ where: { id: row.id }, data: { authUserId: identity.authUserId } })
-      .catch(() => undefined);
+  if (session.expiresAt.getTime() < Date.now()) {
+    await db.session.delete({ where: { id: session.id } }).catch(() => undefined);
+    return null;
   }
 
-  return toSessionUser(row);
+  return toSessionUser(session.user);
 });
 
 /** Returns the user or redirects to /auth with a return path. */
@@ -187,13 +136,9 @@ export async function requireUser(returnTo?: string): Promise<SessionUser> {
   return user;
 }
 
-/** Like `requireUser`, but also accepts a verified phone without a profile. */
-export async function requireIdentity(returnTo?: string): Promise<AuthIdentity> {
-  const identity = await getAuthIdentity();
-  if (!identity) {
-    redirect(`/auth?next=${encodeURIComponent(returnTo ?? "/")}`);
-  }
-  return identity;
+/** Where a signed-in user belongs: onboarding until a phone is on file. */
+export function homeFor(user: SessionUser) {
+  return user.phone ? ROLE_HOME[user.role] : "/onboarding";
 }
 
 /**
@@ -225,12 +170,8 @@ export async function assertRole(role: Role | Role[]): Promise<SessionUser> {
   return user;
 }
 
-/** Ends the session on whichever provider is configured. */
+/** Ends the session: the row is deleted, so the token can never be reused. */
 export async function signOutUser() {
-  if (supabaseConfigured()) {
-    const supabase = await createSupabaseServerClient();
-    await supabase.auth.signOut().catch(() => undefined);
-  }
   await destroySession();
 }
 
@@ -256,13 +197,4 @@ export async function audit(
       },
     })
     .catch(() => undefined);
-}
-
-/* ── Helpers shared with the auth actions ──────────────────────────── */
-
-/** Normalises any provider phone format to +91XXXXXXXXXX. */
-export function normalisePhone(raw: string) {
-  const digits = raw.replace(/[^\d]/g, "");
-  const last10 = digits.slice(-10);
-  return `+91${last10}`;
 }

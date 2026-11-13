@@ -348,9 +348,9 @@ export default async function FarmerDashboard() {
             <div className="border-t border-ivory-200 bg-ivory px-3.5 py-2">
               <p className="flex items-start gap-1 text-[10px] leading-relaxed text-charcoal-400">
                 <TrendingUp className="mt-0.5 size-3 shrink-0" aria-hidden />
-                Sample reference data in Agmarknet format, dated{" "}
-                {data.latestRefs[0] ? formatDate(data.latestRefs[0].reportDate) : "—"}. Not an official
-                quotation or a live transaction price.
+                Official Agmarknet feed (Directorate of Marketing &amp; Inspection), reported{" "}
+                {data.latestRefs[0] ? formatDate(data.latestRefs[0].reportDate) : "—"}. Wholesale
+                reference prices, not a live transaction price.
               </p>
             </div>
           </Panel>

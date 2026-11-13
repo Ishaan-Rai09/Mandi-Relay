@@ -16,39 +16,70 @@ a real person using the app.
 
 ```bash
 npm install
-npm run db:local     # Postgres 16 in Docker on port 5433 (or point DATABASE_URL at Supabase)
-npm run db:push      # create the tables from prisma/schema.prisma
+npm run db:push      # create the tables in Supabase from prisma/schema.prisma
 npm run db:seed      # produce categories only — no accounts, no listings
 npm run dev          # http://localhost:3000
 ```
 
-To use Supabase instead of the local container, put the project's pooled connection string
-in `DATABASE_URL` and apply the RLS policies once:
+The database is Supabase Postgres; there is no local database to start. Put the project's
+connection string in `DATABASE_URL` (Project Settings → Database) and apply the RLS policies
+once:
 
 ```bash
-npx prisma db push                                   # or: prisma migrate deploy
-psql "$DATABASE_URL" -f supabase/policies.sql        # or paste into the Supabase SQL editor
+npx prisma db push                                   # schema, no migration files
+npx prisma db execute --file supabase/policies.sql --schema prisma/schema.prisma
 ```
 
-### Authentication: phone number + one-time code
+### Authentication: email + password, or Google
 
-Sign-in is a phone number and a 6-digit SMS code, handled by Supabase Auth.
+No Supabase Auth and no phone OTP — the database is plain Postgres and the app
+owns identity. Two ways in, one session:
 
-1. Supabase dashboard → **Authentication → Providers → Phone** → enable.
-2. Configure an SMS provider (Twilio, Vonage, MessageBird or Textlocal) with its
-   credentials. Supabase will not send a code without one.
-3. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **Email + password.** scrypt hash (random salt, constant-time compare) in
+  `User.passwordHash`, 8-character minimum, rate limited per IP and per address.
+- **Google OAuth 2.0.** Authorization code + PKCE via
+  `/api/auth/google` → `/api/auth/google/callback`, hand-rolled with no extra
+  dependency. Only Google-verified addresses are accepted.
 
-`/auth` sends the code client-side with the public key, then a server action maps the proven
-phone number onto the application's own `User` row (where the role, district and profile
-live) and hands out the role's workspace. New numbers choose a role first, verify, and land
-on `/onboarding`.
+To enable Google: Google Cloud console → **APIs & Services → Credentials** →
+Create OAuth client ID (Web application), with the authorised redirect URI
+`http://localhost:3000/api/auth/google/callback` (and your production domain),
+then set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. Without them the button
+is hidden and the page says so.
 
-If those two variables are absent the app falls back to a local development provider
-(database session cookie + password) and says so on the sign-in screen — useful for
-offline work, never used in production.
+Both paths end in the same place: a random token in an httpOnly `mr_session`
+cookie, stored in the `Session` table with an expiry. `src/lib/auth.ts` resolves
+it on every page and server action, so a forged cookie reaches a redirect and
+never data.
 
-### Voice: Gnani (Vachana)
+### Password reset
+
+`/forgot-password` sends the link, `/reset-password?token=…` sets the new
+password. The link carries a 32-byte random token and the database keeps only
+its SHA-256 (`PasswordResetToken`), so a leaked table cannot be turned back into
+working links. A link lives 60 minutes, works once, and requesting another one
+deletes the previous one. Saving a new password also deletes every `Session`
+row for that account and issues a fresh one, so a reset signs out anyone else
+who was holding the account.
+
+Delivery goes through Resend's HTTP API — one POST, no SDK:
+
+```bash
+RESEND_API_KEY="re_..."                          # resend.com → API Keys
+EMAIL_FROM="MANDI RELAY <no-reply@your-domain>"   # optional; needs a verified domain
+```
+
+The form answers identically whether or not the address has an account, so it
+cannot be used to discover who is registered. With no key, a development build
+shows the link on the page instead of emailing it; a production build logs the
+failure and shows the same neutral message.
+
+Administrators come from `ADMIN_EMAILS` (comma separated). Roles are chosen by
+the person and enforced server-side; an allowlisted email is an ADMIN whatever
+the form said, and nothing is seeded, so without that variable nobody can reach
+`/admin`.
+
+## Voice: Gnani (Vachana)
 
 The browser records, downsamples to 16 kHz mono WAV and posts it to
 `POST /api/voice/transcribe`, which calls Gnani's REST speech-to-text with a server-side
@@ -93,7 +124,9 @@ the flag is the whole re-enable story.
 src/
   app/
     (public)/          landing page + public marketplace preview
-    auth/ onboarding/  phone-OTP sign-in and profile completion
+    auth/ onboarding/  email + Google sign-in and profile completion
+    forgot-password/   request a single-use reset link
+    reset-password/    set a new password from the emailed link
     api/               voice transcribe proxy, price sync, health
     farmer/            dashboard, voice listing, listings, offers, orders, earnings
     buyer/             dashboard, marketplace, product detail, offers, orders
@@ -107,7 +140,7 @@ src/
     services/          offers, auctions, pricing, matching, market prices
     actions/           validated server actions ("use server")
     queries/           read models for pages
-    supabase/          browser + server clients, config
+    auth/              sessions, Google OAuth, reset tokens, admin allowlist
   hooks/               Gnani recorder / Web Speech wrapper
 prisma/schema.prisma   Postgres data model (Supabase)
 supabase/policies.sql  Row Level Security for direct client access
@@ -118,14 +151,16 @@ public/sw.js           service worker
 
 **One database, and it is Postgres.** Prisma owns the tables and runs against Supabase
 (pooled connection for the app, direct connection for migrations). `supabase/policies.sql`
-adds what Prisma cannot express: RLS so a leaked anon key cannot read someone else's phone
-number, offers, orders or address. The server connects as the owner role and scopes every
+adds what Prisma cannot express: RLS on every table with no policy and no grants for the
+`anon`/`authenticated` roles, so a leaked anon key can read nothing at all — not a phone
+number, offer, order or address. The server connects as the owner role and scopes every
 query in `src/lib/auth.ts`.
 
-**Phone ownership is proven, not typed.** Supabase Auth verifies the number with an SMS
-code; the application row stores `authUserId` and treats the phone as verified. Roles are
-still ours: they are chosen at sign-up and enforced on the server for every route and
-action, never trusted from the client.
+**The password is never stored, only its hash.** scrypt with a per-password salt and a
+constant-time comparison; sign-in returns the same answer for an unknown email as for a
+wrong password, and the hash comparison runs either way. Roles are still ours: they are
+chosen by the person and enforced on the server for every route and action, never trusted
+from the client.
 
 **AI has a real fallback.** `AI_PROVIDER=rules` runs a deterministic multilingual parser
 (Hindi, Punjabi, Hinglish, English) with a commodity lexicon, spoken numerals
@@ -195,5 +230,6 @@ published only when the user confirms after reconnecting.
 - Auction bid boards poll every 20 seconds — no WebSocket/Supabase Realtime subscription is
   configured, and the UI says so.
 - Location tracking is manual status entry by the transporter, not GPS streaming.
-- Phone sign-in needs an SMS provider configured in Supabase; without one Supabase returns an
-  error that the sign-in screen surfaces verbatim.
+- Password reset needs `RESEND_API_KEY`; without it no email leaves the app. A development
+  build shows the link on the page, a production build shows the neutral message and logs
+  the failure, so a forgotten password still needs the provider configured.

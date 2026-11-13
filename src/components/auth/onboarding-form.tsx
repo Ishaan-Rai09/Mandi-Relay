@@ -3,24 +3,71 @@
 import { Crosshair, Loader2, MapPin } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { useLocale } from "@/components/i18n/locale-provider";
+import { LanguageOptions } from "@/components/i18n/language-options";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { saveOnboardingAction } from "@/lib/actions/auth";
 import { BUSINESS_TYPES, BUSINESS_TYPE_LABEL, VEHICLE_LABEL, VEHICLE_TYPES, type Role } from "@/lib/domain";
 import { IDLE } from "@/lib/schemas";
 
+/** Every state and union territory — the marketplace is not region-locked. */
 const STATES = [
-  "Punjab",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
   "Haryana",
-  "Chandigarh",
-  "Delhi",
-  "Uttar Pradesh",
-  "Rajasthan",
   "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
   "Uttarakhand",
+  "West Bengal",
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
 ];
 
-export function OnboardingForm({ role, defaultName }: { role: Role; defaultName: string }) {
+const ROLE_CHOICES: { value: Exclude<Role, "ADMIN">; label: string }[] = [
+  { value: "FARMER", label: "Farmer / producer" },
+  { value: "BUYER", label: "Buyer / business" },
+  { value: "TRANSPORTER", label: "Transporter" },
+];
+
+export function OnboardingForm({
+  role,
+  defaultName,
+  defaultPhone,
+}: {
+  role: Role;
+  defaultName: string;
+  defaultPhone: string;
+}) {
+  const { locale } = useLocale();
+  const [selectedRole, setSelectedRole] = useState<Role>(role);
   const [state, action, pending] = useActionState(saveOnboardingAction, IDLE);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
@@ -59,6 +106,53 @@ export function OnboardingForm({ role, defaultName }: { role: Role; defaultName:
       <input type="hidden" name="lng" value={coords?.lng ?? ""} />
 
       <section className="rounded-[8px] border border-ivory-300 bg-white p-4 sm:p-5">
+        <h2 className="font-display text-[15px] font-bold text-charcoal">How the market reaches you</h2>
+        <p className="mt-0.5 text-[12px] text-charcoal-500">
+          Your number is never shown publicly — buyers see it only after an order exists.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Mobile number"
+            htmlFor="phone"
+            error={state.errors?.phone?.[0]}
+            hint="10 digits"
+            required
+          >
+            <div className="flex">
+              <span className="inline-flex items-center rounded-l-[5px] border border-r-0 border-ivory-300 bg-ivory px-2.5 text-[13px] text-charcoal-500">
+                +91
+              </span>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                placeholder="98100 00000"
+                defaultValue={defaultPhone.replace(/^\+91/, "")}
+                className="rounded-l-none"
+                required
+              />
+            </div>
+          </Field>
+          <Field label="I am a…" htmlFor="role" required>
+            <Select
+              id="role"
+              name="role"
+              value={selectedRole}
+              onChange={(event) => setSelectedRole(event.target.value as Role)}
+            >
+              {ROLE_CHOICES.map((choice) => (
+                <option key={choice.value} value={choice.value}>
+                  {choice.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+      </section>
+
+      <section className="rounded-[8px] border border-ivory-300 bg-white p-4 sm:p-5">
         <h2 className="font-display text-[15px] font-bold text-charcoal">Where are you based?</h2>
         <p className="mt-0.5 text-[12px] text-charcoal-500">
           This sets your default pickup location and how distances are calculated.
@@ -86,10 +180,8 @@ export function OnboardingForm({ role, defaultName }: { role: Role; defaultName:
             <Input id="village" name="village" placeholder="Kharar" required />
           </Field>
           <Field label="Preferred language" htmlFor="language" required>
-            <Select id="language" name="language" defaultValue="hi">
-              <option value="hi">हिन्दी (Hindi)</option>
-              <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
-              <option value="en">English</option>
+            <Select id="language" name="language" defaultValue={locale}>
+              <LanguageOptions />
             </Select>
           </Field>
         </div>
@@ -124,7 +216,7 @@ export function OnboardingForm({ role, defaultName }: { role: Role; defaultName:
         ) : null}
       </section>
 
-      {role === "FARMER" ? (
+      {selectedRole === "FARMER" ? (
         <section className="rounded-[8px] border border-ivory-300 bg-white p-4 sm:p-5">
           <h2 className="font-display text-[15px] font-bold text-charcoal">About your farm</h2>
           <p className="mt-0.5 text-[12px] text-charcoal-500">
@@ -153,7 +245,7 @@ export function OnboardingForm({ role, defaultName }: { role: Role; defaultName:
         </section>
       ) : null}
 
-      {role === "BUYER" ? (
+      {selectedRole === "BUYER" ? (
         <section className="rounded-[8px] border border-ivory-300 bg-white p-4 sm:p-5">
           <h2 className="font-display text-[15px] font-bold text-charcoal">About your business</h2>
           <p className="mt-0.5 text-[12px] text-charcoal-500">
@@ -194,7 +286,7 @@ export function OnboardingForm({ role, defaultName }: { role: Role; defaultName:
         </section>
       ) : null}
 
-      {role === "TRANSPORTER" ? (
+      {selectedRole === "TRANSPORTER" ? (
         <section className="rounded-[8px] border border-ivory-300 bg-white p-4 sm:p-5">
           <h2 className="font-display text-[15px] font-bold text-charcoal">Your vehicle</h2>
           <p className="mt-0.5 text-[12px] text-charcoal-500">

@@ -19,10 +19,12 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import type { Role } from "@/lib/domain";
+import type { MessageKey } from "@/lib/i18n/messages";
 
 export interface NavItem {
   href: string;
-  label: string;
+  /** Catalogue key, resolved with `t()` so the label follows the language. */
+  labelKey: MessageKey;
   icon: LucideIcon;
   badge?: "offers" | "bids" | "deliveries";
   emphasis?: boolean;
@@ -31,57 +33,52 @@ export interface NavItem {
 export const NAV: Record<Role, { primary: NavItem[]; secondary: NavItem[] }> = {
   FARMER: {
     primary: [
-      { href: "/farmer/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/farmer/voice-listing", label: "List by voice", icon: Mic, emphasis: true },
-      { href: "/farmer/listings", label: "My produce", icon: Package },
-      { href: "/farmer/offers", label: "Offers", icon: Handshake, badge: "offers" },
+      { href: "/farmer/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/farmer/voice-listing", labelKey: "nav.listByVoice", icon: Mic, emphasis: true },
+      { href: "/farmer/listings", labelKey: "nav.myProduce", icon: Package },
+      { href: "/farmer/offers", labelKey: "nav.offers", icon: Handshake, badge: "offers" },
       // Live auctions are paused (FEATURES.auctions). Re-enable both entries
       // when NEXT_PUBLIC_ENABLE_AUCTIONS=true.
       // { href: "/farmer/auctions", label: "Auctions", icon: Gavel },
-      { href: "/farmer/orders", label: "Orders", icon: ClipboardList },
-      { href: "/farmer/earnings", label: "Earnings", icon: Wallet },
+      { href: "/farmer/orders", labelKey: "nav.orders", icon: ClipboardList },
+      { href: "/farmer/earnings", labelKey: "nav.earnings", icon: Wallet },
     ],
-    secondary: [{ href: "/farmer/profile", label: "Farm profile", icon: Users }],
+    secondary: [{ href: "/farmer/profile", labelKey: "nav.farmProfile", icon: Users }],
   },
   BUYER: {
     primary: [
-      { href: "/buyer/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/buyer/marketplace", label: "Marketplace", icon: Store },
-      { href: "/buyer/bids", label: "My offers", icon: Handshake, badge: "bids" },
+      { href: "/buyer/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/buyer/marketplace", labelKey: "nav.marketplace", icon: Store },
+      { href: "/buyer/bids", labelKey: "nav.myOffers", icon: Handshake, badge: "bids" },
       // { href: "/buyer/auctions", label: "Auctions", icon: Gavel },
-      { href: "/buyer/orders", label: "Orders", icon: ClipboardList },
+      { href: "/buyer/orders", labelKey: "nav.orders", icon: ClipboardList },
     ],
-    secondary: [{ href: "/buyer/profile", label: "Business profile", icon: Users }],
+    secondary: [{ href: "/buyer/profile", labelKey: "nav.profileSettings", icon: Users }],
   },
   TRANSPORTER: {
     primary: [
-      { href: "/transporter/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/transporter/requests", label: "Load board", icon: ListOrdered, badge: "deliveries" },
-      { href: "/transporter/deliveries", label: "My deliveries", icon: Truck },
+      { href: "/transporter/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/transporter/requests", labelKey: "nav.loadBoard", icon: ListOrdered, badge: "deliveries" },
+      { href: "/transporter/deliveries", labelKey: "nav.myDeliveries", icon: Truck },
     ],
-    secondary: [{ href: "/transporter/profile", label: "Vehicle profile", icon: Bike }],
+    secondary: [{ href: "/transporter/profile", labelKey: "nav.vehicleProfile", icon: Bike }],
   },
   ADMIN: {
     primary: [
-      { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
-      { href: "/admin/users", label: "Users", icon: Users },
-      { href: "/admin/listings", label: "Listings", icon: Package },
-      { href: "/admin/transactions", label: "Transactions", icon: ReceiptText },
-      { href: "/admin/reports", label: "Reports", icon: BadgeIndianRupee },
+      { href: "/admin/dashboard", labelKey: "nav.overview", icon: LayoutDashboard },
+      { href: "/admin/users", labelKey: "nav.users", icon: Users },
+      { href: "/admin/listings", labelKey: "nav.listings", icon: Package },
+      { href: "/admin/transactions", labelKey: "nav.transactions", icon: ReceiptText },
+      { href: "/admin/reports", labelKey: "nav.reports", icon: BadgeIndianRupee },
     ],
     secondary: [],
   },
 };
 
-export const MOBILE_LABELS: Partial<Record<string, string>> = {
-  "/farmer/voice-listing": "List",
-  "/buyer/marketplace": "Market",
-  "/transporter/requests": "Loads",
-};
-
-export const ROLE_ACCENT: Record<Role, { label: string; icon: LucideIcon }> = {
-  FARMER: { label: "Farmer workspace", icon: Sparkles },
-  BUYER: { label: "Buyer workspace", icon: MapPin },
-  TRANSPORTER: { label: "Transporter workspace", icon: Truck },
-  ADMIN: { label: "Administration", icon: ShieldCheck },
+/** Role headings, translated through the same catalogue. */
+export const ROLE_ACCENT: Record<Role, { labelKey: MessageKey; icon: LucideIcon }> = {
+  FARMER: { labelKey: "role.FARMER", icon: Sparkles },
+  BUYER: { labelKey: "role.BUYER", icon: MapPin },
+  TRANSPORTER: { labelKey: "role.TRANSPORTER", icon: Truck },
+  ADMIN: { labelKey: "role.ADMIN", icon: ShieldCheck },
 };

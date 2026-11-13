@@ -15,6 +15,8 @@
  * uploads. See `src/hooks/use-speech.ts`.
  */
 
+import { LOCALES } from "@/lib/i18n/locales";
+
 export type SpeechProvider = "browser" | "gnani";
 
 export interface TranscriptResult {
@@ -45,22 +47,31 @@ export const TRANSCRIBE_ENDPOINT = "/api/voice/transcribe";
  */
 export const MAX_RECORDING_MS = 27_000;
 
-/** BCP-47 tags used by the Web Speech API for each supported language. */
+/**
+ * BCP-47 tags for the Web Speech API, derived from the site's locale registry so
+ * a farmer who switched the interface to Tamil gets Tamil recognition too.
+ */
 export const SPEECH_LOCALES: Record<string, string> = {
-  en: "en-IN",
-  hi: "hi-IN",
-  pa: "pa-IN",
+  ...Object.fromEntries(LOCALES.map((locale) => [locale.code, locale.bcp47])),
   auto: "hi-IN",
 };
 
 /**
- * Gnani language codes. `indic-auto` (Prisma v3.0 only) lets the model identify
- * the language itself and report it back as `detected_language_code`.
+ * Gnani language codes. It transcribes ten languages directly; anything else is
+ * sent as `indic-auto` on Prisma v3.0, which identifies the language itself and
+ * reports it back as `detected_language_code`.
  */
 export const GNANI_LANGUAGE_CODES: Record<string, string> = {
+  bn: "bn-IN",
   en: "en-IN",
+  gu: "gu-IN",
   hi: "hi-IN",
+  kn: "kn-IN",
+  ml: "ml-IN",
+  mr: "mr-IN",
   pa: "pa-IN",
+  ta: "ta-IN",
+  te: "te-IN",
   auto: "indic-auto",
 };
 

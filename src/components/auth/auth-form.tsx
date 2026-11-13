@@ -1,17 +1,17 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Loader2, MessageSquare, ShieldCheck, UserRound } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowRight, UserRound } from "lucide-react";
+import { useActionState, useState } from "react";
 
+import { LanguageOptions } from "@/components/i18n/language-options";
+import { useLocale } from "@/components/i18n/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
-import { completePhoneAuthAction, signInAction, signUpAction } from "@/lib/actions/auth";
-import { IDLE, type ActionState } from "@/lib/schemas";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
+import { signInAction, signUpAction } from "@/lib/actions/auth";
 import type { Role } from "@/lib/domain";
+import { IDLE, type ActionState } from "@/lib/schemas";
+import { cn } from "@/lib/utils";
 
 type Mode = "signin" | "signup";
 type SignupRole = Exclude<Role, "ADMIN">;
@@ -22,38 +22,68 @@ const ROLE_OPTIONS: { value: SignupRole; label: string; hint: string }[] = [
   { value: "TRANSPORTER", label: "Transporter", hint: "I move produce between mandis" },
 ];
 
-function digitsOnly(value: string) {
-  return value.replace(/\D/g, "").slice(-10);
-}
+/** Google's own words are for developers; these are the ones a person can act on. */
+const OAUTH_ERRORS: Record<string, string> = {
+  "google-not-configured":
+    "Google sign-in is not set up on this deployment yet. Use your email and password.",
+  cancelled: "Google sign-in was cancelled.",
+  expired: "That Google sign-in took too long. Please try again.",
+  state: "That Google sign-in could not be verified. Please try again.",
+  "no-code": "Google did not return an authorisation code. Please try again.",
+  exchange: "Google did not complete the sign-in. Please try again.",
+  profile: "Google did not share a usable profile. Please try another account.",
+  "email-unverified":
+    "Google has not verified that email address, so it cannot be used to sign in here.",
+};
 
-/** Supabase error strings are developer-facing; keep the ones users can act on. */
-function readableAuthError(message: string): string {
-  const lower = message.toLowerCase();
-  if (lower.includes("rate") || lower.includes("too many")) {
-    return "Too many codes requested. Wait a minute and try again.";
-  }
-  if (lower.includes("invalid") || lower.includes("expired")) {
-    return "That code is not valid or has already expired. Request a new one.";
-  }
-  if (lower.includes("sms") || lower.includes("provider")) {
-    return "SMS delivery is not configured on this project yet. Ask the operator to enable a phone provider in Supabase.";
-  }
-  return message;
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4" aria-hidden focusable="false">
+      <path
+        fill="#4285F4"
+        d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.63v3h3.86c2.26-2.09 3.56-5.17 3.56-8.87Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58V6.62H1.29a11.99 11.99 0 0 0 0 10.76l3.98-3.09Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.7 0 3.99 2.47 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75Z"
+      />
+    </svg>
+  );
 }
 
 export function AuthForm({
   initialMode,
   initialRole,
   next,
-  phoneAuth,
+  googleEnabled,
+  oauthError,
 }: {
   initialMode: Mode;
   initialRole: SignupRole;
   next?: string;
-  /** True when Supabase is configured, which makes phone OTP the only method. */
-  phoneAuth: boolean;
+  /** False when GOOGLE_CLIENT_ID / SECRET are missing, so the button is honest. */
+  googleEnabled: boolean;
+  /** `?error=` code handed back by the Google callback. */
+  oauthError?: string;
 }) {
   const [mode, setMode] = useState<Mode>(initialMode);
+
+  const [signInState, signIn, signingIn] = useActionState(signInAction, IDLE as ActionState);
+  const [signUpState, signUp, signingUp] = useActionState(signUpAction, IDLE as ActionState);
+  const [role, setRole] = useState<SignupRole>(initialRole);
+  const { locale } = useLocale();
+
+  const state = mode === "signin" ? signInState : signUpState;
+  const pending = mode === "signin" ? signingIn : signingUp;
+  const oauthMessage = oauthError ? OAUTH_ERRORS[oauthError] : null;
 
   return (
     <div className="w-full">
@@ -76,188 +106,89 @@ export function AuthForm({
         ))}
       </div>
 
-      {phoneAuth ? (
-        <PhoneAuthForm key={mode} mode={mode} initialRole={initialRole} next={next} />
-      ) : (
-        <LocalAuthForm mode={mode} next={next} />
-      )}
-
-      <p className="mt-5 text-center text-[11px] text-charcoal-400">
-        By continuing you agree that no payments are processed and listings are moderated, not
-        certified.
-      </p>
-    </div>
-  );
-}
-
-/* ── Supabase: phone number + one-time code ────────────────────────── */
-
-function PhoneAuthForm({
-  mode,
-  initialRole,
-  next,
-}: {
-  mode: Mode;
-  initialRole: SignupRole;
-  next?: string;
-}) {
-  const router = useRouter();
-  const [step, setStep] = useState<"details" | "code">("details");
-  const [role, setRole] = useState<SignupRole>(initialRole);
-  const [name, setName] = useState("");
-  const [language, setLanguage] = useState("hi");
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
-  const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Record<string, string[]> | undefined>();
-  const [cooldown, setCooldown] = useState(0);
-
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const timer = window.setInterval(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
-    return () => window.clearInterval(timer);
-  }, [cooldown]);
-
-  const e164 = `+91${digitsOnly(phone)}`;
-
-  async function sendCode(event?: React.FormEvent) {
-    event?.preventDefault();
-    if (pending) return;
-    setMessage(null);
-    setErrors(undefined);
-
-    if (digitsOnly(phone).length !== 10) {
-      setMessage("Enter your 10-digit mobile number.");
-      return;
-    }
-    if (mode === "signup" && name.trim().length < 2) {
-      setMessage("Enter your full name.");
-      return;
-    }
-
-    setPending(true);
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: e164,
-      options: { shouldCreateUser: true },
-    });
-    setPending(false);
-
-    if (error) {
-      setMessage(readableAuthError(error.message));
-      return;
-    }
-    setStep("code");
-    setCooldown(60);
-    setCode("");
-  }
-
-  async function verifyCode(event: React.FormEvent) {
-    event.preventDefault();
-    if (pending) return;
-    setMessage(null);
-
-    const token = code.replace(/\D/g, "");
-    if (token.length !== 6) {
-      setMessage("Enter the 6-digit code from the SMS.");
-      return;
-    }
-
-    setPending(true);
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.verifyOtp({ phone: e164, token, type: "sms" });
-    if (error) {
-      setPending(false);
-      setMessage(readableAuthError(error.message));
-      return;
-    }
-
-    const result = await completePhoneAuthAction({ mode, name, role, language, next });
-    setPending(false);
-
-    if (!result.ok) {
-      setErrors(result.errors);
-      setMessage(result.message ?? "Could not finish signing in.");
-      if (mode === "signin") setStep("details");
-      return;
-    }
-
-    router.replace(result.destination ?? "/");
-    router.refresh();
-  }
-
-  if (step === "code") {
-    return (
-      <form onSubmit={verifyCode} className="space-y-4">
-        <div className="rounded-[5px] border border-forest/20 bg-forest-50 px-3 py-2.5">
-          <p className="flex items-center gap-1.5 text-[12px] font-medium text-forest-700">
-            <MessageSquare className="size-3.5" aria-hidden /> Code sent to {e164.replace("+91", "+91 ")}
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setStep("details");
-              setMessage(null);
-            }}
-            className="mt-1 inline-flex items-center gap-1 text-[11px] text-charcoal-500 underline decoration-charcoal/20 underline-offset-2 hover:text-charcoal"
-          >
-            <ArrowLeft className="size-3" aria-hidden /> Use a different number
-          </button>
-        </div>
-
-        {message ? (
-          <p role="alert" className="rounded-[5px] border border-danger/25 bg-danger-soft px-3 py-2 text-[12.5px] leading-relaxed text-danger">
-            {message}
-          </p>
-        ) : null}
-
-        <Field label="6-digit code" htmlFor="otp" required>
-          <Input
-            id="otp"
-            name="otp"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            placeholder="000000"
-            value={code}
-            onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
-            required
-            autoFocus
-          />
-        </Field>
-
-        <Button type="submit" size="lg" className="w-full" loading={pending} icon={<ArrowRight className="size-4" />}>
-          {mode === "signup" ? "Verify and create account" : "Verify and sign in"}
-        </Button>
-
-        <div className="text-center">
-          {cooldown > 0 ? (
-            <p className="text-[11.5px] text-charcoal-400">Resend in {cooldown}s</p>
-          ) : (
-            <button
-              type="button"
-              onClick={() => void sendCode()}
-              className="text-[11.5px] font-medium text-forest-700 underline decoration-forest/30 underline-offset-2"
-            >
-              Resend code
-            </button>
-          )}
-        </div>
-      </form>
-    );
-  }
-
-  return (
-    <form onSubmit={sendCode} className="space-y-4">
-      {message ? (
-        <p role="alert" className="rounded-[5px] border border-danger/25 bg-danger-soft px-3 py-2 text-[12.5px] leading-relaxed text-danger">
-          {message}
+      {oauthMessage ? (
+        <p
+          role="alert"
+          className="mb-4 rounded-[5px] border border-danger/25 bg-danger-soft px-3 py-2 text-[12.5px] leading-relaxed text-danger"
+        >
+          {oauthMessage}
         </p>
       ) : null}
 
-      {mode === "signup" ? (
+      {googleEnabled ? (
         <>
+          <a
+            href={`/api/auth/google${next ? `?next=${encodeURIComponent(next)}` : ""}`}
+            className="inline-flex w-full items-center justify-center gap-2.5 rounded-[5px] border border-ivory-300 bg-white px-4 py-2.5 text-[13.5px] font-medium text-charcoal transition-colors hover:border-forest/30 hover:bg-ivory-200/40"
+          >
+            <GoogleMark />
+            Continue with Google
+          </a>
+
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-ivory-300" aria-hidden />
+            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-charcoal-400">
+              or
+            </span>
+            <span className="h-px flex-1 bg-ivory-300" aria-hidden />
+          </div>
+        </>
+      ) : null}
+
+      {state.message ? (
+        <p
+          role="alert"
+          className="mb-4 rounded-[5px] border border-danger/25 bg-danger-soft px-3 py-2 text-[12.5px] leading-relaxed text-danger"
+        >
+          {state.message}
+        </p>
+      ) : null}
+
+      {mode === "signin" ? (
+        <form action={signIn} className="space-y-4">
+          <input type="hidden" name="next" value={next ?? ""} />
+          <Field label="Email address" htmlFor="signin-email" error={state.errors?.email?.[0]} required>
+            <Input
+              id="signin-email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              required
+              autoFocus
+            />
+          </Field>
+          <Field label="Password" htmlFor="signin-password" error={state.errors?.password?.[0]} required>
+            <Input
+              id="signin-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Your password"
+              required
+            />
+          </Field>
+          <div className="-mt-1 flex justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-[12px] font-medium text-forest-700 hover:underline"
+            >
+              Forgot your password?
+            </Link>
+          </div>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            loading={pending}
+            icon={<ArrowRight className="size-4" />}
+          >
+            Sign in
+          </Button>
+        </form>
+      ) : (
+        <form action={signUp} className="space-y-4">
           <fieldset>
             <legend className="mb-2 text-[13px] font-medium text-charcoal">I am a…</legend>
             <div className="grid gap-1.5">
@@ -280,7 +211,9 @@ function PhoneAuthForm({
                     className="size-3.5 accent-[var(--color-forest)]"
                   />
                   <span className="min-w-0">
-                    <span className="block text-[13px] font-medium text-charcoal">{option.label}</span>
+                    <span className="block text-[13px] font-medium text-charcoal">
+                      {option.label}
+                    </span>
                     <span className="block text-[11px] text-charcoal-400">{option.hint}</span>
                   </span>
                 </label>
@@ -289,116 +222,47 @@ function PhoneAuthForm({
           </fieldset>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Full name" htmlFor="name" error={errors?.name?.[0]} required>
+            <Field label="Full name" htmlFor="signup-name" error={state.errors?.name?.[0]} required>
               <Input
-                id="name"
+                id="signup-name"
                 name="name"
                 autoComplete="name"
                 placeholder="Gurpreet Singh"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
                 required
               />
             </Field>
-            <Field label="Preferred language" htmlFor="language" required>
-              <Select
-                id="language"
-                name="language"
-                value={language}
-                onChange={(event) => setLanguage(event.target.value)}
-              >
-                <option value="hi">हिन्दी (Hindi)</option>
-                <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
-                <option value="en">English</option>
+            <Field label="Preferred language" htmlFor="signup-language" required>
+              <Select id="signup-language" name="language" defaultValue={locale}>
+                <LanguageOptions />
               </Select>
             </Field>
           </div>
-        </>
-      ) : null}
 
-      <Field label="Mobile number" htmlFor="phone" error={errors?.phone?.[0]} required>
-        <div className="flex">
-          <span className="inline-flex items-center rounded-l-[5px] border border-r-0 border-ivory-300 bg-ivory px-2.5 text-[13px] text-charcoal-500">
-            +91
-          </span>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
-            placeholder="98100 00000"
-            className="rounded-l-none"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+          <Field label="Email address" htmlFor="signup-email" error={state.errors?.email?.[0]} required>
+            <Input
+              id="signup-email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              required
+            />
+          </Field>
+
+          <Field
+            label="Mobile number"
+            htmlFor="signup-phone"
+            error={state.errors?.phone?.[0]}
+            hint="Used only to coordinate a delivery — never shown publicly"
             required
-          />
-        </div>
-      </Field>
-
-      <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-charcoal-400">
-        <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-forest-600" aria-hidden />
-        We send a 6-digit code by SMS. No password to remember, and your number is never shown
-        publicly — buyers only see it after an order exists.
-      </p>
-
-      <Button
-        type="submit"
-        size="lg"
-        className="w-full"
-        loading={pending}
-        icon={mode === "signup" ? <UserRound className="size-4" /> : <ArrowRight className="size-4" />}
-      >
-        {mode === "signup" ? "Create account" : "Send code"}
-      </Button>
-
-      {pending ? (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center justify-center gap-1.5 text-[11.5px] text-charcoal-400"
-        >
-          <Loader2 className="size-3 animate-spin" aria-hidden /> Sending your code…
-        </motion.p>
-      ) : null}
-    </form>
-  );
-}
-
-/* ── Local development: password sign-in, no Supabase keys ─────────── */
-
-function LocalAuthForm({ mode, next }: { mode: Mode; next?: string }) {
-  const [signInState, signIn, signingIn] = useActionState(signInAction, IDLE as ActionState);
-  const [signUpState, signUp, signingUp] = useActionState(signUpAction, IDLE as ActionState);
-
-  const state = mode === "signin" ? signInState : signUpState;
-  const pending = mode === "signin" ? signingIn : signingUp;
-
-  return (
-    <>
-      <p className="mb-4 rounded-[5px] border border-info/20 bg-info-soft px-3 py-2 text-[11.5px] leading-relaxed text-charcoal-500">
-        Supabase is not configured in this environment, so the local development provider is
-        active. Set <code className="font-mono text-[11px]">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-        <code className="font-mono text-[11px]">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to sign in
-        with a phone number and one-time code.
-      </p>
-
-      {state.message ? (
-        <p role="alert" className="mb-4 rounded-[5px] border border-danger/25 bg-danger-soft px-3 py-2 text-[12.5px] leading-relaxed text-danger">
-          {state.message}
-        </p>
-      ) : null}
-
-      {mode === "signin" ? (
-        <form action={signIn} className="space-y-4">
-          <input type="hidden" name="next" value={next ?? ""} />
-          <Field label="Mobile number" htmlFor="local-phone" error={state.errors?.phone?.[0]} required>
+          >
             <div className="flex">
               <span className="inline-flex items-center rounded-l-[5px] border border-r-0 border-ivory-300 bg-ivory px-2.5 text-[13px] text-charcoal-500">
                 +91
               </span>
               <Input
-                id="local-phone"
+                id="signup-phone"
                 name="phone"
                 type="tel"
                 inputMode="numeric"
@@ -409,48 +273,16 @@ function LocalAuthForm({ mode, next }: { mode: Mode; next?: string }) {
               />
             </div>
           </Field>
-          <Field label="Password" htmlFor="local-password" error={state.errors?.password?.[0]} required>
+
+          <Field
+            label="Password"
+            htmlFor="signup-password"
+            hint="8+ characters"
+            error={state.errors?.password?.[0]}
+            required
+          >
             <Input
-              id="local-password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Your password"
-              required
-            />
-          </Field>
-          <Button type="submit" size="lg" className="w-full" loading={pending} icon={<ArrowRight className="size-4" />}>
-            Sign in
-          </Button>
-        </form>
-      ) : (
-        <form action={signUp} className="space-y-4">
-          <Field label="Full name" htmlFor="local-name" error={state.errors?.name?.[0]} required>
-            <Input id="local-name" name="name" autoComplete="name" placeholder="Gurpreet Singh" required />
-          </Field>
-          <Field label="Mobile number" htmlFor="local-signup-phone" error={state.errors?.phone?.[0]} required>
-            <Input
-              id="local-signup-phone"
-              name="phone"
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel"
-              placeholder="98100 00000"
-              required
-            />
-          </Field>
-          <Field label="I am a…" htmlFor="local-role" required>
-            <Select id="local-role" name="role" defaultValue="FARMER">
-              {ROLE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Password" htmlFor="local-new-password" hint="8+ characters" error={state.errors?.password?.[0]} required>
-            <Input
-              id="local-new-password"
+              id="signup-password"
               name="password"
               type="password"
               autoComplete="new-password"
@@ -458,11 +290,23 @@ function LocalAuthForm({ mode, next }: { mode: Mode; next?: string }) {
               required
             />
           </Field>
-          <Button type="submit" size="lg" className="w-full" loading={pending} icon={<UserRound className="size-4" />}>
+
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            loading={pending}
+            icon={<UserRound className="size-4" />}
+          >
             Create account
           </Button>
         </form>
       )}
-    </>
+
+      <p className="mt-5 text-center text-[11px] leading-relaxed text-charcoal-400">
+        By continuing you agree that no payments are processed and listings are moderated, not
+        certified.
+      </p>
+    </div>
   );
 }

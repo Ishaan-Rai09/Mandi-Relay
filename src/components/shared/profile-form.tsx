@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Save } from "lucide-react";
 
+import { LanguageOptions } from "@/components/i18n/language-options";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { saveProfileAction } from "@/lib/actions/auth";
@@ -48,9 +49,7 @@ export function ProfileForm({ role, defaults }: { role: Role; defaults: ProfileD
           </Field>
           <Field label="Preferred language" htmlFor="profile-language">
             <Select id="profile-language" name="language" defaultValue={defaults.language}>
-              <option value="hi">हिन्दी (Hindi)</option>
-              <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
-              <option value="en">English</option>
+              <LanguageOptions />
             </Select>
           </Field>
         </div>

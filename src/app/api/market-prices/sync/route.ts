@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { getSessionUser } from "@/lib/auth";
@@ -22,12 +23,20 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/** Constant-time comparison so the secret cannot be guessed byte by byte. */
+function matches(provided: string | null | undefined, secret: string): boolean {
+  if (!provided) return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 async function authorised(request: Request): Promise<boolean> {
   const secret = process.env.MARKET_PRICES_SYNC_SECRET;
   if (secret) {
     const header = request.headers.get("x-sync-secret");
     const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-    if (header === secret || bearer === secret) return true;
+    if (matches(header, secret) || matches(bearer, secret)) return true;
   }
 
   const user = await getSessionUser();

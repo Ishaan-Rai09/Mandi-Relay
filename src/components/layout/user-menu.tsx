@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { LogOut, Settings, ShieldCheck } from "lucide-react";
 
+import { useT } from "@/components/i18n/locale-provider";
+import { ROLE_ACCENT } from "@/components/layout/nav-config";
 import { signOutAction } from "@/lib/actions/auth";
 import type { SessionUser } from "@/lib/domain";
-import { ROLE_LABEL } from "@/lib/domain";
 import { initials } from "@/lib/utils";
 
 export function UserMenu({ user }: { user: SessionUser }) {
+  const t = useT();
   const profileHref =
     user.role === "FARMER"
       ? "/farmer/profile"
@@ -31,7 +33,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
           <span className="block max-w-32 truncate text-[12.5px] font-semibold text-charcoal">
             {user.name}
           </span>
-          <span className="block text-[10.5px] text-charcoal-400">{ROLE_LABEL[user.role]}</span>
+          <span className="block text-[10.5px] text-charcoal-400">{t(ROLE_ACCENT[user.role].labelKey)}</span>
         </span>
         <svg viewBox="0 0 16 16" className="size-3 text-charcoal-400" aria-hidden>
           <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -55,14 +57,14 @@ export function UserMenu({ user }: { user: SessionUser }) {
           href={profileHref}
           className="flex items-center gap-2 px-3 py-2 text-[13px] text-charcoal-500 transition-colors hover:bg-ivory hover:text-charcoal"
         >
-          <Settings className="size-3.5" aria-hidden /> Profile &amp; settings
+          <Settings className="size-3.5" aria-hidden /> {t("nav.profileSettings")}
         </Link>
         <form action={signOutAction}>
           <button
             type="submit"
             className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-charcoal-500 transition-colors hover:bg-ivory hover:text-danger"
           >
-            <LogOut className="size-3.5" aria-hidden /> Sign out
+            <LogOut className="size-3.5" aria-hidden /> {t("nav.signOut")}
           </button>
         </form>
       </div>

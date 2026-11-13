@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -7,27 +8,33 @@ import { revalidatePath } from "next/cache";
 import {
   audit,
   createSession,
-  getAuthIdentity,
   hashPassword,
+  normaliseEmail,
   requireUser,
   signOutUser,
   verifyPassword,
 } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/auth/admin";
+import {
+  completePasswordReset,
+  requestPasswordReset,
+  RESET_TTL_MINUTES,
+} from "@/lib/auth/reset";
 import { db } from "@/lib/db";
-import { ROLE_HOME } from "@/lib/domain";
+import { ROLE_HOME, type Role } from "@/lib/domain";
+import { emailConfigured } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
-import { supabaseConfigured } from "@/lib/supabase/config";
 import {
   fieldErrors,
   normalisePhone,
   onboardingSchema,
-  phoneSignUpSchema,
   profileSchema,
+  requestResetSchema,
+  resetPasswordSchema,
   signInSchema,
   signUpSchema,
   type ActionState,
 } from "@/lib/schemas";
-import { parseJsonArray } from "@/lib/utils";
 
 /** Only internal, single-slash paths are accepted as a post-auth destination. */
 function safeNext(value: string | undefined | null): string | null {
@@ -45,34 +52,37 @@ function splitList(value: string | undefined | null): string {
   );
 }
 
-/**
- * Phone numbers that become administrators on first sign-in.
- * `ADMIN_PHONE_NUMBERS="+91981..., +91982..."` — comma separated, E.164 or
- * local. Roles are never accepted from the client, so this list is the only
- * way to mint an administrator (the demo seed used to do it).
- */
-function isAdminPhone(phone: string): boolean {
-  const list = (process.env.ADMIN_PHONE_NUMBERS ?? "")
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .map((value) => normalisePhone(value));
-  return list.includes(phone);
+/** Where a signed-in account belongs, allowlist included. */
+function destinationFor(user: { role: string; phone: string | null; email: string }) {
+  if (isAdminEmail(user.email)) return ROLE_HOME.ADMIN;
+  if (!user.phone) return "/onboarding";
+  return ROLE_HOME[user.role as Role];
 }
 
-/* ── Local development provider (no Supabase keys) ─────────────────── */
+/** Absolute origin for links in email: configured site URL, else the request. */
+async function publicOrigin() {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configured) return configured.replace(/\/+$/, "");
+
+  const hdrs = await headers();
+  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
+  const proto =
+    hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
+function clientIp(hdrs: { get(name: string): string | null }) {
+  return hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+}
+
+/* ── Email + password ──────────────────────────────────────────────── */
 
 export async function signInAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  // The password provider is a development convenience only.
-  if (supabaseConfigured()) {
-    return { ok: false, message: "Sign in with your phone number and the one-time code." };
-  }
-
   const parsed = signInSchema.safeParse({
-    phone: formData.get("phone"),
+    email: formData.get("email"),
     password: formData.get("password"),
   });
 
@@ -82,46 +92,44 @@ export async function signInAction(
 
   const hdrs = await headers();
   const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  const limit = rateLimit(`signin:${ip}`, 12, 300);
-  if (!limit.allowed) {
+  const byIp = rateLimit(`signin:${ip}`, 12, 300);
+  const byEmail = rateLimit(`signin:email:${parsed.data.email}`, 8, 300);
+  if (!byIp.allowed || !byEmail.allowed) {
     return {
       ok: false,
-      message: `Too many attempts. Try again in ${Math.ceil(limit.retryAfterSeconds / 60)} minutes.`,
+      message: `Too many attempts. Try again in ${Math.ceil(
+        Math.max(byIp.retryAfterSeconds, byEmail.retryAfterSeconds) / 60,
+      )} minutes.`,
     };
   }
 
-  const phone = normalisePhone(parsed.data.phone);
-  const user = await db.user.findUnique({ where: { phone } });
+  const user = await db.user.findUnique({ where: { email: normaliseEmail(parsed.data.email) } });
 
-  // Constant-ish response: never reveal whether the phone number exists.
-  const valid = user ? verifyPassword(parsed.data.password, user.passwordHash) : false;
+  // Same response whether the email is unknown or the password is wrong, and
+  // the hash comparison runs either way so timing does not leak the answer.
+  const valid = verifyPassword(parsed.data.password, user?.passwordHash ?? null);
   if (!user || !valid) {
-    return { ok: false, message: "That phone number and password do not match." };
+    return { ok: false, message: "That email and password do not match." };
   }
 
   await createSession(user.id);
-  await audit(user.id, "SIGN_IN", "user", user.id);
+  await audit(user.id, "SIGN_IN", "user", user.id, { provider: "password" });
 
-  const next = String(formData.get("next") ?? "");
-  const destination =
-    next && next.startsWith("/") && !next.startsWith("//") ? next : ROLE_HOME[user.role as keyof typeof ROLE_HOME];
-  redirect(destination);
+  const requested = safeNext(String(formData.get("next") ?? ""));
+  redirect(requested ?? destinationFor(user));
 }
 
 export async function signUpAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  if (supabaseConfigured()) {
-    return { ok: false, message: "Create your account with a phone number and one-time code." };
-  }
-
   const parsed = signUpSchema.safeParse({
     name: formData.get("name"),
-    phone: formData.get("phone"),
+    email: formData.get("email"),
     password: formData.get("password"),
+    phone: formData.get("phone"),
     role: formData.get("role"),
-    language: formData.get("language") ?? "hi",
+    language: formData.get("language") ?? "en",
   });
 
   if (!parsed.success) {
@@ -135,28 +143,158 @@ export async function signUpAction(
     return { ok: false, message: "Too many sign-up attempts. Please try again shortly." };
   }
 
+  const email = normaliseEmail(parsed.data.email);
   const phone = normalisePhone(parsed.data.phone);
-  const existing = await db.user.findUnique({ where: { phone } });
+
+  const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) {
+    return { ok: false, message: "An account already exists for that email. Sign in instead." };
+  }
+
+  // An allowlisted email is an administrator whatever the form said.
+  const admin = isAdminEmail(email);
+
+  let user;
+  try {
+    user = await db.user.create({
+      data: {
+        name: parsed.data.name,
+        email,
+        phone,
+        role: admin ? "ADMIN" : parsed.data.role,
+        passwordHash: hashPassword(parsed.data.password),
+        language: parsed.data.language,
+      },
+    });
+  } catch (error) {
+    // Only realistic cause: the phone number is already on another account.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return {
+        ok: false,
+        errors: { phone: ["That mobile number already belongs to another account."] },
+      };
+    }
+    throw error;
+  }
+
+  await createSession(user.id);
+  await audit(user.id, "SIGN_UP", "user", user.id, { role: user.role, provider: "password" });
+  redirect(admin ? ROLE_HOME.ADMIN : "/onboarding");
+}
+
+/* ── Password reset ────────────────────────────────────────────────── */
+
+/**
+ * Sends a single-use reset link.
+ *
+ * The response is identical whether or not the address has an account, so the
+ * form cannot be used to discover who is registered. The one exception is
+ * delivery not being configured on this deployment: in development the link is
+ * handed back so a reset can still be completed locally, and in production the
+ * failure is logged and the visitor still gets the neutral message.
+ */
+export async function requestResetAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = requestResetSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    return { ok: false, errors: fieldErrors(parsed.error) };
+  }
+
+  const hdrs = await headers();
+  const ip = clientIp(hdrs);
+  const byIp = rateLimit(`reset:${ip}`, 5, 900);
+  if (!byIp.allowed) {
     return {
       ok: false,
-      message: "An account already exists for this number. Sign in instead.",
+      message: `Too many reset requests from this network. Try again in ${Math.ceil(
+        byIp.retryAfterSeconds / 60,
+      )} minutes.`,
     };
   }
 
-  const user = await db.user.create({
-    data: {
-      name: parsed.data.name,
-      phone,
-      role: isAdminPhone(phone) ? "ADMIN" : parsed.data.role,
-      passwordHash: hashPassword(parsed.data.password),
-      language: parsed.data.language,
-    },
+  const neutral = `If that email belongs to an account, a reset link is on its way. It works once, within ${RESET_TTL_MINUTES} minutes.`;
+
+  // Per-address limit, so one inbox cannot be flooded. Same neutral answer.
+  const byEmail = rateLimit(`reset:email:${parsed.data.email}`, 3, 900);
+  if (!byEmail.allowed) return { ok: true, message: neutral };
+
+  const outcome = await requestPasswordReset(parsed.data.email, await publicOrigin());
+  if (outcome.status === "unknown") return { ok: true, message: neutral };
+
+  if (outcome.status === "sent") {
+    await audit(outcome.userId, "PASSWORD_RESET_REQUEST", "user", outcome.userId, {
+      delivered: true,
+    });
+    return { ok: true, message: neutral };
+  }
+
+  console.warn(
+    `[password-reset] not delivered for user ${outcome.userId}: ${
+      outcome.status === "failed" ? outcome.error : "RESEND_API_KEY is not set"
+    }`,
+  );
+  await audit(outcome.userId, "PASSWORD_RESET_REQUEST", "user", outcome.userId, {
+    delivered: false,
+    reason: outcome.status,
   });
 
+  // Nowhere to deliver the link, so a development build hands it to the person
+  // who asked for it instead of losing it. Production stays neutral.
+  if (process.env.NODE_ENV !== "production" && !emailConfigured()) {
+    console.info(`[password-reset] development link: ${outcome.link}`);
+    return {
+      ok: true,
+      message:
+        "Email delivery is not set up on this deployment yet, so the reset link is shown below instead of being emailed.",
+      data: { devLink: outcome.link },
+    };
+  }
+  return { ok: true, message: neutral };
+}
+
+/** Consumes the link and signs the account in on the new password. */
+export async function resetPasswordAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = resetPasswordSchema.safeParse({
+    token: formData.get("token"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { ok: false, errors: fieldErrors(parsed.error) };
+  }
+
+  const hdrs = await headers();
+  const limit = rateLimit(`reset-submit:${clientIp(hdrs)}`, 10, 900);
+  if (!limit.allowed) {
+    return { ok: false, message: "Too many attempts. Please request a new link later." };
+  }
+
+  const done = await completePasswordReset(parsed.data.token, parsed.data.password);
+  if (!done.ok) {
+    return {
+      ok: false,
+      message:
+        "That reset link has expired or was already used. Request a new one to continue.",
+      data: { expired: true },
+    };
+  }
+
+  const user = await db.user.findUniqueOrThrow({
+    where: { id: done.userId },
+    select: { id: true, email: true, role: true, phone: true },
+  });
+
+  await audit(user.id, "PASSWORD_RESET", "user", user.id);
+
+  // The old password is gone and every session was just revoked, so issue a
+  // fresh one rather than bouncing the person back to the sign-in form.
   await createSession(user.id);
-  await audit(user.id, "SIGN_UP", "user", user.id, { role: user.role });
-  redirect(isAdminPhone(phone) ? ROLE_HOME.ADMIN : "/onboarding");
+  redirect(destinationFor(user));
 }
 
 export async function signOutAction() {
@@ -164,91 +302,6 @@ export async function signOutAction() {
   if (user) await audit(user.id, "SIGN_OUT", "user", user.id);
   await signOutUser();
   redirect("/");
-}
-
-/* ── Supabase phone OTP ────────────────────────────────────────────── */
-
-/**
- * Called by the browser immediately after `verifyOtp()` succeeds, when the
- * Supabase session cookie already exists. It maps that proven phone number onto
- * the application's own user row: existing users are signed in, new ones are
- * created with the role they chose on the form.
- */
-export async function completePhoneAuthAction(input: {
-  mode: "signin" | "signup";
-  name?: string;
-  role?: string;
-  language?: string;
-  next?: string;
-}): Promise<ActionState & { destination?: string }> {
-  const identity = await getAuthIdentity();
-  if (!identity?.authUserId) {
-    return { ok: false, message: "Verify your phone number again — the session expired." };
-  }
-
-  const existing = await db.user.findFirst({
-    where: {
-      OR: [{ authUserId: identity.authUserId }, { phone: identity.phone }],
-    },
-  });
-
-  if (existing) {
-    if (existing.authUserId !== identity.authUserId) {
-      await db.user.update({
-        where: { id: existing.id },
-        data: { authUserId: identity.authUserId },
-      });
-    }
-    await audit(existing.id, "SIGN_IN", "user", existing.id);
-    return {
-      ok: true,
-      destination: safeNext(input.next) ?? ROLE_HOME[existing.role as keyof typeof ROLE_HOME],
-    };
-  }
-
-  if (input.mode !== "signup") {
-    // Do not leave a verified-but-profileless session behind.
-    await signOutUser();
-    return {
-      ok: false,
-      message: "That number is not registered yet. Choose “Create account” to join.",
-    };
-  }
-
-  const parsed = phoneSignUpSchema.safeParse({
-    name: input.name,
-    role: input.role,
-    language: input.language ?? "hi",
-  });
-  if (!parsed.success) {
-    return { ok: false, errors: fieldErrors(parsed.error) };
-  }
-
-  const limit = rateLimit(`signup:${identity.phone}`, 4, 600);
-  if (!limit.allowed) {
-    return { ok: false, message: "Too many sign-up attempts. Please try again shortly." };
-  }
-
-  // A phone on the operator allowlist is an administrator, whatever the form
-  // said. Everyone else keeps the role they chose.
-  const admin = isAdminPhone(identity.phone);
-
-  const user = await db.user.create({
-    data: {
-      authUserId: identity.authUserId,
-      phone: identity.phone,
-      name: parsed.data.name,
-      role: admin ? "ADMIN" : parsed.data.role,
-      language: parsed.data.language,
-      // The one-time code proved control of this number.
-      verified: true,
-    },
-  });
-
-  await audit(user.id, "SIGN_UP", "user", user.id, { role: user.role, provider: "phone-otp" });
-
-  // Administrators have no farm, business or vehicle to describe.
-  return { ok: true, destination: admin ? ROLE_HOME.ADMIN : "/onboarding" };
 }
 
 /** Completes the profile collected during onboarding. */
@@ -260,6 +313,8 @@ export async function saveOnboardingAction(
 
   const raw = {
     language: formData.get("language"),
+    phone: formData.get("phone"),
+    role: formData.get("role") || undefined,
     state: formData.get("state"),
     district: formData.get("district"),
     village: formData.get("village"),
@@ -284,10 +339,26 @@ export async function saveOnboardingAction(
     return { ok: false, errors: fieldErrors(parsed.error) };
   }
   const data = parsed.data;
+  const phone = normalisePhone(data.phone);
+
+  // One number, one account: buyers and farmers are reached through it.
+  const clash = await db.user.findFirst({
+    where: { phone, id: { not: user.id } },
+    select: { id: true },
+  });
+  if (clash) {
+    return { ok: false, errors: { phone: ["That mobile number already belongs to another account."] } };
+  }
+
+  // The role can still be corrected here (Google accounts arrive without one),
+  // but an allowlisted email stays an administrator.
+  const role: Role = isAdminEmail(user.email) ? "ADMIN" : (data.role ?? user.role);
 
   await db.user.update({
     where: { id: user.id },
     data: {
+      phone,
+      role,
       language: data.language,
       state: data.state,
       district: data.district,
@@ -297,7 +368,7 @@ export async function saveOnboardingAction(
     },
   });
 
-  if (user.role === "FARMER" && data.farmName) {
+  if (role === "FARMER" && data.farmName) {
     await db.farm.upsert({
       where: { userId: user.id },
       create: {
@@ -315,7 +386,7 @@ export async function saveOnboardingAction(
     });
   }
 
-  if (user.role === "BUYER" && data.businessName) {
+  if (role === "BUYER" && data.businessName) {
     await db.businessProfile.upsert({
       where: { userId: user.id },
       create: {
@@ -337,7 +408,7 @@ export async function saveOnboardingAction(
     });
   }
 
-  if (user.role === "TRANSPORTER" && data.vehicleType) {
+  if (role === "TRANSPORTER" && data.vehicleType) {
     await db.transporterProfile.upsert({
       where: { userId: user.id },
       create: {
@@ -359,7 +430,7 @@ export async function saveOnboardingAction(
 
   await audit(user.id, "ONBOARDING_COMPLETE", "user", user.id);
   revalidatePath("/", "layout");
-  redirect(ROLE_HOME[user.role]);
+  redirect(ROLE_HOME[role]);
 }
 
 /** Profile edit from the role profile pages. */
@@ -468,12 +539,4 @@ export async function saveProfileAction(
   return { ok: true, message: "Profile saved." };
 }
 
-/** Used by the profile page to preview saved produce categories. */
-export async function readProfileLists(userId: string) {
-  const farm = await db.farm.findUnique({ where: { userId } });
-  const business = await db.businessProfile.findUnique({ where: { userId } });
-  return {
-    primaryCrops: parseJsonArray(farm?.primaryCrops),
-    preferredCommodities: parseJsonArray(business?.preferredCommodities),
-  };
-}
+

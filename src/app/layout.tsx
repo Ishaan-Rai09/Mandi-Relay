@@ -7,8 +7,10 @@ import "@fontsource-variable/manrope";
 import "@fontsource-variable/noto-sans-devanagari";
 import "@fontsource-variable/noto-sans-gurmukhi";
 
+import { LocaleProvider } from "@/components/i18n/locale-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { ServiceWorkerRegistrar } from "@/components/pwa/service-worker";
+import { getLocale, localeMeta, messagesFor } from "@/lib/i18n";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -53,9 +55,15 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // The visitor's language comes from a cookie (or their browser), so the whole
+  // document — lang, direction and every server-rendered label — changes with
+  // one switch.
+  const locale = await getLocale();
+  const meta = localeMeta(locale);
+
   return (
-    <html lang="en-IN" suppressHydrationWarning>
+    <html lang={meta.bcp47} dir={meta.dir} suppressHydrationWarning>
       <body className="min-h-dvh bg-ivory font-sans text-charcoal antialiased">
         <a
           href="#main"
@@ -63,7 +71,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <ToastProvider>{children}</ToastProvider>
+        <LocaleProvider locale={locale} messages={messagesFor(locale)}>
+          <ToastProvider>{children}</ToastProvider>
+        </LocaleProvider>
         <ServiceWorkerRegistrar />
       </body>
     </html>

@@ -148,6 +148,18 @@ export async function respondToOffer(input: RespondInput) {
       );
     }
 
+    // Conditional decrement: the read above is only a friendly pre-check. Two
+    // buyers accepting at the same moment would both pass it under READ
+    // COMMITTED, so the stock is claimed with a guarded UPDATE that only
+    // succeeds while enough is still available.
+    const claimed = await tx.listing.updateMany({
+      where: { id: offer.listingId, availableQuantity: { gte: offer.quantity } },
+      data: { availableQuantity: { decrement: offer.quantity } },
+    });
+    if (claimed.count === 0) {
+      throw new OfferError("Another buyer just took the rest of this lot. Refresh to see what is left.");
+    }
+
     const buyer = await tx.user.findUnique({ where: { id: offer.buyerId } });
     const accepted = await tx.offer.update({
       where: { id: offer.id },
@@ -164,7 +176,11 @@ export async function respondToOffer(input: RespondInput) {
       transportCost: transport,
     });
 
-    const remaining = round2(offer.listing.availableQuantity - offer.quantity);
+    const afterClaim = await tx.listing.findUniqueOrThrow({
+      where: { id: offer.listingId },
+      select: { availableQuantity: true },
+    });
+    const remaining = round2(afterClaim.availableQuantity);
 
     const order = await tx.order.create({
       data: {
@@ -188,10 +204,7 @@ export async function respondToOffer(input: RespondInput) {
     // remainder. RESERVED means "held for an auction", not "partly sold".
     await tx.listing.update({
       where: { id: offer.listingId },
-      data: {
-        availableQuantity: remaining,
-        status: remaining <= 0 ? "SOLD" : "ACTIVE",
-      },
+      data: { status: remaining <= 0 ? "SOLD" : "ACTIVE" },
     });
 
     outbox.push(

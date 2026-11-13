@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auctionsEnabled } from "@/lib/features";
 import { marketFeedConfigured } from "@/lib/services/market-prices";
-import { supabaseConfigured } from "@/lib/supabase/config";
+import { googleConfigured } from "@/lib/auth/google";
 
 /**
  * Readiness probe. Reports what is wired up without leaking any secret: booleans
@@ -36,7 +36,7 @@ export async function GET() {
     database,
     counts,
     integrations: {
-      supabaseAuth: supabaseConfigured() ? "supabase-phone-otp" : "local-development-provider",
+      auth: googleConfigured() ? "email-password+google" : "email-password",
       speechToText: process.env.GNANI_API_KEY ? "gnani-prisma" : "not-configured",
       marketPriceFeed: marketFeedConfigured() ? "agmarknet" : "not-configured",
       extraction: (process.env.AI_PROVIDER ?? "rules") === "llm" && process.env.AI_API_KEY ? "llm" : "rules-engine",

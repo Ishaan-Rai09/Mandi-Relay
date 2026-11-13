@@ -92,12 +92,14 @@ export async function searchListings(filters: MarketplaceFilters): Promise<{
   }
   if (filters.q) {
     const q = filters.q.trim();
+    // Postgres `contains` is case-sensitive by default; "Wheat" must match
+    // "wheat" or a buyer silently sees an empty marketplace.
     where.OR = [
-      { commodity: { contains: q } },
-      { variety: { contains: q } },
-      { location: { contains: q } },
-      { district: { contains: q } },
-      { description: { contains: q } },
+      { commodity: { contains: q, mode: "insensitive" } },
+      { variety: { contains: q, mode: "insensitive" } },
+      { location: { contains: q, mode: "insensitive" } },
+      { district: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
     ];
   }
 

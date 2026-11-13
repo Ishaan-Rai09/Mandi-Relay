@@ -91,7 +91,14 @@ async function main() {
   const stamp = Date.now().toString().slice(-7);
   const makeUser = async (name: string, role: string, slot: string) => {
     const user = await db.user.create({
-      data: { name, phone: `+919${slot}${stamp}`, role, language: "en", verified: true },
+      data: {
+        name,
+        email: `verify-${slot}-${stamp}@example.invalid`,
+        phone: `+919${slot}${stamp}`,
+        role,
+        language: "en",
+        verified: true,
+      },
     });
     created.users.push(user.id);
     return user;

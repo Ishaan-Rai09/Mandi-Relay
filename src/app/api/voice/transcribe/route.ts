@@ -46,9 +46,9 @@ function resolveLanguage(raw: string): { code: string; auto: boolean } {
   const short = value.split("-")[0];
   const mapped = GNANI_LANGUAGE_CODES[short];
   if (mapped && !mapped.startsWith("indic")) return { code: mapped, auto: false };
-  // Already a BCP-47 tag we pass through (e.g. "mr-IN").
-  if (/^[a-z]{2}-[a-z]{2}$/.test(value)) return { code: value, auto: false };
-  return { code: GNANI_LANGUAGE_CODES.hi, auto: false };
+  // A language Gnani cannot be pinned to (Assamese, Urdu, Santali …) is sent as
+  // indic-auto: the model identifies what was spoken instead of forcing Hindi.
+  return { code: GNANI_LANGUAGE_CODES.auto, auto: true };
 }
 
 /** Gnani uses three different error envelopes; flatten them into one message. */
@@ -120,7 +120,11 @@ export async function POST(request: Request) {
   }
 
   const user = await getSessionUser();
-  const limit = rateLimit(`gnani:${user?.id ?? "anon"}`, 60, 60);
+  // Anonymous callers (the landing-page playground) are limited per address, not
+  // as one shared "anon" bucket that a single visitor could exhaust.
+  const hdrs = request.headers;
+  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? hdrs.get("x-real-ip") ?? "local";
+  const limit = rateLimit(`gnani:${user?.id ?? `ip:${ip}`}`, 60, 60);
   if (!limit.allowed) {
     return NextResponse.json(
       { error: `Too many voice requests. Try again in ${limit.retryAfterSeconds}s.` },

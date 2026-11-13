@@ -4,8 +4,18 @@ import { db } from "@/lib/db";
 import { auctionsEnabled } from "@/lib/features";
 import { latestReference, priceHistory } from "@/lib/queries/listings";
 
-/** Loads everything a listing detail page needs in one pass. */
-export async function getListingDetail(id: string) {
+/**
+ * Loads everything a listing detail page needs in one pass.
+ *
+ * A listing that is paused, rejected, sold or awaiting moderation is private: it
+ * is only returned to the farmer who owns it or to an administrator. Without
+ * `viewer`, only publicly visible lots are returned, so a guessed id cannot be
+ * used to read a withdrawn lot.
+ */
+export async function getListingDetail(
+  id: string,
+  viewer?: { userId: string; role: string } | null,
+) {
   const listing = await db.listing.findUnique({
     where: { id },
     include: {
@@ -16,6 +26,13 @@ export async function getListingDetail(id: string) {
   });
 
   if (!listing) return null;
+
+  const isPublic =
+    listing.moderationStatus === "APPROVED" &&
+    (listing.status === "ACTIVE" || listing.status === "RESERVED");
+  const canSeePrivate =
+    viewer?.role === "ADMIN" || (viewer != null && listing.farmerId === viewer.userId);
+  if (!isPublic && !canSeePrivate) return null;
 
   const [reference, history] = await Promise.all([
     latestReference(listing.commodity),

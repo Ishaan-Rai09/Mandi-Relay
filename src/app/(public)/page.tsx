@@ -526,10 +526,10 @@ export default async function LandingPage() {
                     About this data
                   </p>
                   <p className="mt-1 text-[12px] leading-relaxed text-charcoal-500">
-                    The rows below are clearly labelled sample reference data in Agmarknet format.
-                    They are not official quotations and not live transaction prices. A production
-                    deployment points the same table at an official feed and keeps the date and
-                    source on every row.
+                    These rows come from Agmarknet, the Directorate of Marketing &amp;
+                    Inspection&apos;s daily mandi reporting feed. Each row keeps its market, variety
+                    and report date, and nothing is invented: when the feed has no row for a
+                    commodity, no price is shown.
                   </p>
                 </div>
               </div>
@@ -578,7 +578,7 @@ export default async function LandingPage() {
                   </table>
                 </div>
                 <div className="border-t border-ivory-200 bg-ivory px-3 py-2 text-[10.5px] text-charcoal-400">
-                  Prices per quintal · Source: sample reference data (Agmarknet format) · Not an official quotation
+                  Prices per quintal · Source: Agmarknet, Directorate of Marketing &amp; Inspection · Wholesale reference, not a transaction price
                 </div>
               </Panel>
             </Reveal>

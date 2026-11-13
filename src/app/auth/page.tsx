@@ -4,10 +4,11 @@ import { ArrowLeft, BadgeCheck, Languages, Mic } from "lucide-react";
 import type { Metadata } from "next";
 
 import { AuthForm } from "@/components/auth/auth-form";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Wordmark } from "@/components/layout/wordmark";
-import { getSessionUser } from "@/lib/auth";
-import { ROLE_HOME, type Role } from "@/lib/domain";
-import { supabaseConfigured } from "@/lib/supabase/config";
+import { getSessionUser, homeFor } from "@/lib/auth";
+import type { Role } from "@/lib/domain";
+import { googleConfigured } from "@/lib/auth/google";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -17,11 +18,11 @@ export const metadata: Metadata = {
 export default async function AuthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; role?: string; next?: string }>;
+  searchParams: Promise<{ mode?: string; role?: string; next?: string; error?: string }>;
 }) {
   const params = await searchParams;
   const user = await getSessionUser();
-  if (user) redirect(ROLE_HOME[user.role]);
+  if (user) redirect(homeFor(user));
 
   const mode = params.mode === "signup" ? "signup" : "signin";
   const roleParam = (params.role ?? "farmer").toUpperCase();
@@ -64,7 +65,7 @@ export default async function AuthPage({
             {[
               { icon: Mic, text: "Speak in Hindi, Punjabi or English — or type if you prefer" },
               { icon: BadgeCheck, text: "Offers persist; nothing is accepted without your confirmation" },
-              { icon: Languages, text: "Whole interface available in three languages" },
+              { icon: Languages, text: "Whole interface available in 22 Indian languages" },
             ].map((item) => (
               <li key={item.text} className="flex items-start gap-2.5">
                 <item.icon className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden />
@@ -75,8 +76,8 @@ export default async function AuthPage({
         </div>
 
         <p className="relative text-[10.5px] leading-relaxed text-ivory/35">
-          Built for Punjab and the NCR corridor. Phone numbers are verified by one-time code.
-          No financial transactions are processed.
+          Built for Punjab and the NCR corridor. Sign in with Google or an email address. No
+          financial transactions are processed.
         </p>
       </aside>
 
@@ -89,8 +90,11 @@ export default async function AuthPage({
           >
             <ArrowLeft className="size-3.5" aria-hidden /> Back to home
           </Link>
-          <div className="lg:hidden">
-            <Wordmark compact />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <div className="lg:hidden">
+              <Wordmark compact />
+            </div>
           </div>
         </div>
 
@@ -110,7 +114,8 @@ export default async function AuthPage({
                 initialMode={mode}
                 initialRole={role}
                 next={next}
-                phoneAuth={supabaseConfigured()}
+                googleEnabled={googleConfigured()}
+                oauthError={params.error}
               />
             </div>
           </div>

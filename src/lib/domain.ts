@@ -1,22 +1,26 @@
 /**
  * Canonical domain vocabulary for Mandi Relay.
  *
- * Enum-like values are stored as strings in the database so that the same model
- * works on SQLite (local) and Postgres (Supabase). This module is the single
- * source of truth for those values, their labels and their presentation.
+ * Enum-like values are stored as strings in the database so the model stays
+ * portable; this module is the single source of truth for those values, their
+ * labels and their presentation.
  */
+import { LOCALES } from "@/lib/i18n/locales";
 
 export const ROLES = ["FARMER", "BUYER", "TRANSPORTER", "ADMIN"] as const;
 export type Role = (typeof ROLES)[number];
 
-export const LANGUAGES = ["en", "hi", "pa"] as const;
-export type Language = (typeof LANGUAGES)[number];
+/**
+ * Every language the interface can be read in: the 22 languages of the Eighth
+ * Schedule plus English. The list comes from the locale registry so a language
+ * can never be selectable in the switcher but rejected when saved to a profile.
+ */
+export const LANGUAGES: string[] = LOCALES.map((locale) => locale.code);
+export type Language = string;
 
-export const LANGUAGE_LABELS: Record<Language, string> = {
-  en: "English",
-  hi: "हिन्दी",
-  pa: "ਪੰਜਾਬੀ",
-};
+export const LANGUAGE_LABELS: Record<string, string> = Object.fromEntries(
+  LOCALES.map((locale) => [locale.code, locale.native]),
+);
 
 export const LISTING_STATUSES = [
   "DRAFT",
@@ -164,6 +168,7 @@ export type NotificationType =
 export interface SessionUser {
   id: string;
   name: string;
+  email: string;
   phone: string;
   role: Role;
   language: Language;

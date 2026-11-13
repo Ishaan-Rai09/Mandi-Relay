@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { MOBILE_LABELS, NAV } from "@/components/layout/nav-config";
+import { useT } from "@/components/i18n/locale-provider";
+import { NAV } from "@/components/layout/nav-config";
 import type { Role } from "@/lib/domain";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ export function SidebarNav({
   counts: NavCounts;
 }) {
   const pathname = usePathname();
+  const t = useT();
   const { primary, secondary } = NAV[role];
 
   const renderItem = (item: (typeof primary)[number]) => {
@@ -64,7 +66,7 @@ export function SidebarNav({
             )}
             strokeWidth={1.9}
           />
-          <span className="truncate">{item.label}</span>
+          <span className="truncate">{t(item.labelKey)}</span>
           {count > 0 ? (
             <span
               title={BADGE_MEANING[item.badge!]}
@@ -98,6 +100,7 @@ export function SidebarNav({
 
 export function MobileNav({ role, counts }: { role: Role; counts: NavCounts }) {
   const pathname = usePathname();
+  const t = useT();
   const items = NAV[role].primary.slice(0, 5);
 
   return (
@@ -129,7 +132,7 @@ export function MobileNav({ role, counts }: { role: Role; counts: NavCounts }) {
                     </span>
                   ) : null}
                 </span>
-                <span className="truncate">{MOBILE_LABELS[item.href] ?? item.label}</span>
+                <span className="w-full truncate text-center">{t(item.labelKey)}</span>
                 {active ? (
                   <span aria-hidden className="absolute inset-x-3 top-0 h-[2px] rounded-full bg-gold" />
                 ) : null}

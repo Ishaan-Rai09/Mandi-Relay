@@ -73,7 +73,7 @@ export default async function OnboardingPage() {
         </p>
 
         <div className="mt-7">
-          <OnboardingForm role={user.role} defaultName={user.name} />
+          <OnboardingForm role={user.role} defaultName={user.name} defaultPhone={user.phone} />
         </div>
       </main>
     </div>
