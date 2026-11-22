@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft, Info } from "lucide-react";
+import { Mic } from "lucide-react";
 
 import { VoiceStudio } from "@/components/farmer/voice-studio";
-import { db } from "@/lib/db";
+import { BackLink, PageHeader } from "@/components/ui/misc";
+import { Pill } from "@/components/ui/panel";
 import { requireRole } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 export const metadata: Metadata = { title: "List produce by voice" };
 export const dynamic = "force-dynamic";
@@ -22,25 +23,17 @@ export default async function VoiceListingPage() {
   return (
     <div className="mx-auto w-full max-w-5xl">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Link
-          href="/farmer/dashboard"
-          className="inline-flex items-center gap-1 text-[12px] font-medium text-charcoal-500 hover:text-forest-700"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden /> Dashboard
-        </Link>
-        <p className="flex items-center gap-1.5 text-[11px] text-charcoal-400">
-          <Info className="size-3.5" aria-hidden />
-          Microphone needs HTTPS or localhost and your permission
-        </p>
+        <BackLink href="/farmer/dashboard">Dashboard</BackLink>
+        <Pill tone="forest" dot>
+          <Mic className="size-3" aria-hidden />
+          Voice listing
+        </Pill>
       </div>
 
-      <h1 className="font-display text-[26px] font-bold tracking-[-0.03em] text-charcoal sm:text-[30px]">
-        List produce by voice
-      </h1>
-      <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-charcoal-500">
-        Say what you have in Hindi, Punjabi or English. We extract the produce, quantity, place and
-        date — then you review every field before it goes live.
-      </p>
+      <PageHeader
+        title="List produce by voice"
+        description="Say what you have in Hindi, Punjabi or English. We pull out the produce, quantity, place and date — you check every field before it goes live."
+      />
 
       <div className="mt-5">
         <VoiceStudio

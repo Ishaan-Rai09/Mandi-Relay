@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { CalendarDays, Gavel, MapPin, Package, ShieldAlert, Truck, Wheat } from "lucide-react";
 
-import { ListingCard } from "@/components/marketplace/listing-card";
 import { OfferForm } from "@/components/marketplace/offer-form";
 import { PriceReferencePanel, type ReferenceRow } from "@/components/marketplace/price-reference";
 import { ProduceTile } from "@/components/ui/produce-art";

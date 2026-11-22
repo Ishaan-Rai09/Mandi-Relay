@@ -54,12 +54,11 @@ export function MicButton({
             <Mic className={size === "lg" ? "size-9" : "size-6"} strokeWidth={1.7} />
           )}
         </button>
-        {listening && size === "lg" ? (
-          <div className="pointer-events-none absolute inset-x-0 -bottom-1 translate-y-full pt-3">
-            <Waveform level={level} active bars={20} className="h-6 w-40" />
-          </div>
-        ) : null}
       </div>
+      {/* In normal flow, not overlaid: it used to cover the hint text below. */}
+      {listening && size === "lg" ? (
+        <Waveform level={level} active bars={20} className="h-5 w-40" />
+      ) : null}
       {label ? (
         <p
           className={cn(

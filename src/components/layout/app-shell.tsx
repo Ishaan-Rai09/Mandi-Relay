@@ -86,9 +86,6 @@ export async function AppShell({
                 </span>
               ) : null}
             </Link>
-            <p className="mt-1 px-2.5 text-[10.5px] leading-relaxed text-charcoal-400">
-              {t("shell.voicePermission")}
-            </p>
             <div className="mt-2 px-1">
               <LanguageSwitcher className="w-full justify-between" />
             </div>
