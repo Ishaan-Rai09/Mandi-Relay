@@ -56,22 +56,22 @@ export default async function TransporterDashboard() {
       />
 
       <Panel className="grid grid-cols-2 divide-ivory-200 sm:grid-cols-4 sm:divide-x">
-        <div className="p-4">
+        <div className="min-w-0 p-4">
           <Stat label="Open loads" value={openRequests.length} sub="available to quote" />
         </div>
-        <div className="border-l border-ivory-200 p-4 sm:border-l-0">
+        <div className="min-w-0 border-l border-ivory-200 p-4 sm:border-l-0">
           <Stat label="Active deliveries" value={active.length} />
         </div>
-        <div className="border-t border-ivory-200 p-4 sm:border-t-0">
+        <div className="min-w-0 border-t border-ivory-200 p-4 sm:border-t-0">
           <Stat label="Completed" value={completed.length} />
         </div>
-        <div className="border-l border-t border-ivory-200 p-4 sm:border-l-0 sm:border-t-0">
+        <div className="min-w-0 border-l border-t border-ivory-200 p-4 sm:border-l-0 sm:border-t-0">
           <Stat label="Quoted value" value={formatINR(earnings)} sub={`${selected.length} selected`} tone="forest" />
         </div>
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel>
+        <Panel className="min-w-0">
           <PanelHeader
             title="Loads near your service area"
             action={
@@ -110,7 +110,7 @@ export default async function TransporterDashboard() {
           )}
         </Panel>
 
-        <Panel>
+        <Panel className="min-w-0">
           <PanelHeader
             title="Active deliveries"
             action={
@@ -135,7 +135,10 @@ export default async function TransporterDashboard() {
                         {formatINR(delivery.amount)} · assigned {timeAgo(delivery.createdAt)}
                       </p>
                     </div>
-                    <Pill tone={delivery.status === "DELIVERED" ? "success" : delivery.status === "IN_TRANSIT" ? "info" : "gold"}>
+                    <Pill
+                      className="shrink-0 whitespace-nowrap"
+                      tone={delivery.status === "DELIVERED" ? "success" : delivery.status === "IN_TRANSIT" ? "info" : "gold"}
+                    >
                       {DELIVERY_STATUS_LABEL[delivery.status as DeliveryStatus]}
                     </Pill>
                   </div>
