@@ -1,0 +1,1780 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 8,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "composition_file_too_large",
+        "severity": "warning",
+        "message": "This HTML composition file has 437 lines. Smaller sub-compositions are easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Split coherent scenes or layers into separate .html files under compositions/, then mount them from the parent with data-composition-src so each file stays small enough to inspect, revise, and validate independently."
+      },
+      {
+        "code": "timeline_track_too_dense",
+        "severity": "warning",
+        "message": "This HTML file has 6 timed elements. Smaller sub-compositions keep timelines easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move coherent scene groups into separate .html files under compositions/ and mount them from the parent with data-composition-src so the timeline stays easier to inspect, revise, and validate."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s1\"> is a timeline element that contains nested <div id=\"s1-inner\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s1",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s1\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s2\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s2",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s2\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s3\"> is a timeline element that contains nested <div id=\"s3-cam\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s3",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s3\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s4\"> is a timeline element that contains nested <div id=\"s4-grid\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s4",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s4\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s5\"> is a timeline element that contains nested <div id=\"s5-grid\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s5",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s5\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s6\"> is a timeline element that contains nested <div id=\"s6-glow\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s6",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s6\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 14,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-hook\" is 0.19s but its slot (data-duration) is 1.10s — the slot is shortened to the media length when rendered. Set data-duration to ~0.19s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-mic\" is 0.10s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.10s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-f1\" is 0.11s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.11s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-f2\" is 0.19s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.19s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-f3\" is 0.19s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.19s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-f4\" is 0.11s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.11s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-f5\" is 0.19s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.19s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-live\" is 0.19s but its slot (data-duration) is 0.60s — the slot is shortened to the media length when rendered. Set data-duration to ~0.19s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-o1\" is 0.11s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.11s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-o2\" is 0.19s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.19s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-o3\" is 0.19s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.19s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-click\" is 0.06s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.06s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-confirm\" is 0.66s but its slot (data-duration) is 1.60s — the slot is shortened to the media length when rendered. Set data-duration to ~0.66s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-word\" is 1.48s but its slot (data-duration) is 1.80s — the slot is shortened to the media length when rendered. Set data-duration to ~1.48s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      }
+    ]
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 3,
+    "findings": [
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 1.111,
+        "selector": "#bg-rings > circle:nth-of-type(4)",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 1270.51,
+          "top": -9.49,
+          "right": 2129.49,
+          "bottom": 849.49,
+          "width": 858.98,
+          "height": 858.98
+        },
+        "containerSelector": "#bg-rings",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 1311.41,
+          "top": 31.41,
+          "right": 2088.59,
+          "bottom": 808.59,
+          "width": 777.17,
+          "height": 777.17
+        },
+        "overflow": {
+          "left": 40.9,
+          "right": 40.9,
+          "top": 40.9,
+          "bottom": 40.9
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1270.51,
+          "y": -9.49,
+          "width": 858.98,
+          "height": 858.98
+        },
+        "firstSeen": 1.111,
+        "lastSeen": 18.889,
+        "occurrences": 9,
+        "heldMs": 0,
+        "times": [
+          1.111,
+          3.333,
+          5.556,
+          7.778,
+          10,
+          12.222,
+          14.444,
+          16.667,
+          18.889
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 7.778,
+        "selector": "#s3-f3 > span:nth-of-type(2)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 1418.53,
+          "top": 478.15,
+          "right": 1705.61,
+          "bottom": 514.95,
+          "width": 287.08,
+          "height": 36.8
+        },
+        "containerSelector": "#s3-f3",
+        "text": "Tomorrow, morning",
+        "fixHint": "Text is 287px x 37px inside 693px x 82px and overflows by up to 6px; widen the container to at least ~699px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 1006.41,
+          "top": 456.17,
+          "right": 1699.57,
+          "bottom": 537.96,
+          "width": 693.17,
+          "height": 81.78
+        },
+        "overflow": {
+          "right": 6.04
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1418.53,
+          "y": 478.15,
+          "width": 287.08,
+          "height": 36.8
+        },
+        "firstSeen": 7.778,
+        "lastSeen": 7.778,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          7.778
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 7.778,
+        "selector": "#s3-cam",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -36.27,
+          "top": -12.04,
+          "right": 1926.54,
+          "bottom": 1092.04,
+          "width": 1962.82,
+          "height": 1104.08
+        },
+        "containerSelector": "#s3",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 36.27,
+          "right": 6.54,
+          "top": 12.04,
+          "bottom": 12.04
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -36.27,
+          "y": -12.04,
+          "width": 1962.82,
+          "height": 1104.08
+        },
+        "firstSeen": 7.778,
+        "lastSeen": 7.778,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          7.778
+        ]
+      }
+    ],
+    "duration": 20,
+    "samples": [
+      1.111,
+      3.333,
+      5.556,
+      7.778,
+      10,
+      12.222,
+      14.444,
+      16.667,
+      18.889
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 3,
+    "truncated": false,
+    "faceCheck": {
+      "ran": true,
+      "candidates": 0,
+      "faces": 0
+    }
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      1.111,
+      5.556,
+      10,
+      14.444,
+      18.889
+    ],
+    "checked": 134,
+    "passed": 134
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 8,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"no form-filling no call centre no middleman\" (8 words) is on screen 1.60 s (±0.01 s), under its 2.17 s floor: hold it about 0.5 s + 0.3 s a word (2.90 s here) before it leaves or changes; see references/motion.md.",
+        "text": "no form-filling no call centre no middleman",
+        "selector": "div.cap",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1649.42,
+          "y": 561,
+          "width": 160.41000000000008,
+          "height": 96.19000000000005
+        },
+        "time": 1,
+        "words": 8,
+        "seconds": 1.602,
+        "floorSeconds": 2.175,
+        "measured": [
+          {
+            "time": 0.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 0.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 0.875,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 1,
+            "opacity": 0.59,
+            "heightPx": 96
+          },
+          {
+            "time": 1.125,
+            "opacity": 0.87,
+            "heightPx": 96
+          },
+          {
+            "time": 1.25,
+            "opacity": 0.99,
+            "heightPx": 96
+          },
+          {
+            "time": 1.375,
+            "opacity": 1,
+            "heightPx": 96
+          },
+          {
+            "time": 2.125,
+            "opacity": 1,
+            "heightPx": 96
+          },
+          {
+            "time": 2.25,
+            "opacity": 1,
+            "heightPx": 96
+          },
+          {
+            "time": 2.375,
+            "opacity": 1,
+            "heightPx": 96
+          },
+          {
+            "time": 2.5,
+            "opacity": 1,
+            "heightPx": 96
+          },
+          {
+            "time": 2.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 2.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 2.875,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"That's the entire listing form.\" (5 words) is on screen 1.13 s (±0.01 s), under its 1.50 s floor: hold it about 0.5 s + 0.3 s a word (2.00 s here) before it leaves or changes; see references/motion.md.",
+        "text": "That's the entire listing form.",
+        "selector": "#s1-sub",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 140,
+          "y": 610.81,
+          "width": 627.44,
+          "height": 65
+        },
+        "time": 1.469,
+        "words": 5,
+        "seconds": 1.133,
+        "floorSeconds": 1.5,
+        "measured": [
+          {
+            "time": 1.125,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 1.25,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 1.375,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 1.5,
+            "opacity": 0.66,
+            "heightPx": 65
+          },
+          {
+            "time": 1.625,
+            "opacity": 0.92,
+            "heightPx": 65
+          },
+          {
+            "time": 1.75,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 1.875,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 2.125,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 2.25,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 2.375,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 2.5,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 2.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 2.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 2.875,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Mere paas kal subah 500 kilo fresh tomatoes available hai...\" (22 words) is on screen 3.16 s (±0.01 s), under its 5.32 s floor: hold it about 0.5 s + 0.3 s a word (7.10 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Mere paas kal subah 500 kilo fresh tomatoes available hain. Main Mohali mein hoon. Mujhe 20 rupaye kilo se achha rate chahiye.",
+        "selector": "#s2-transcript",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 256,
+          "y": 435,
+          "width": 116.88,
+          "height": 36
+        },
+        "time": 3.039,
+        "words": 22,
+        "seconds": 3.164,
+        "floorSeconds": 5.325,
+        "measured": [
+          {
+            "time": 2.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 2.875,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 3,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 3.125,
+            "opacity": 1,
+            "heightPx": 36
+          },
+          {
+            "time": 3.25,
+            "opacity": 1,
+            "heightPx": 36
+          },
+          {
+            "time": 3.375,
+            "opacity": 1,
+            "heightPx": 36
+          },
+          {
+            "time": 3.5,
+            "opacity": 1,
+            "heightPx": 36
+          },
+          {
+            "time": 5.75,
+            "opacity": 1,
+            "heightPx": 127
+          },
+          {
+            "time": 5.875,
+            "opacity": 1,
+            "heightPx": 127
+          },
+          {
+            "time": 6,
+            "opacity": 1,
+            "heightPx": 127
+          },
+          {
+            "time": 6.125,
+            "opacity": 1,
+            "heightPx": 127
+          },
+          {
+            "time": 6.25,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 6.375,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 6.5,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"One spoken sentence, mapped onto the fields a marketplace...\" (24 words) is on screen 3.30 s (±0.01 s), under its 5.77 s floor: hold it about 0.5 s + 0.3 s a word (7.70 s here) before it leaves or changes; see references/motion.md.",
+        "text": "One spoken sentence, mapped onto the fields a marketplace actually needs. Nothing was guessed — the quantity, date and location were all in the sentence.",
+        "selector": "#s3-left-note",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 226.18,
+          "y": 408.34,
+          "width": 703.95,
+          "height": 88.11000000000001
+        },
+        "time": 6.305,
+        "words": 24,
+        "seconds": 3.297,
+        "floorSeconds": 5.775,
+        "measured": [
+          {
+            "time": 6,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 6.125,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 6.25,
+            "opacity": 0.14,
+            "heightPx": 88
+          },
+          {
+            "time": 6.375,
+            "opacity": 0.89,
+            "heightPx": 88
+          },
+          {
+            "time": 6.5,
+            "opacity": 1,
+            "heightPx": 88
+          },
+          {
+            "time": 6.625,
+            "opacity": 1,
+            "heightPx": 88
+          },
+          {
+            "time": 6.75,
+            "opacity": 1,
+            "heightPx": 89
+          },
+          {
+            "time": 9.125,
+            "opacity": 1,
+            "heightPx": 92
+          },
+          {
+            "time": 9.25,
+            "opacity": 1,
+            "heightPx": 92
+          },
+          {
+            "time": 9.375,
+            "opacity": 1,
+            "heightPx": 92
+          },
+          {
+            "time": 9.5,
+            "opacity": 1,
+            "heightPx": 92
+          },
+          {
+            "time": 9.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9.875,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"₹20+ per kg\" (3 words) is on screen 0.87 s (±0.01 s), under its 1.05 s floor: hold it about 0.5 s + 0.3 s a word (1.40 s here) before it leaves or changes; see references/motion.md.",
+        "text": "₹20+ per kg",
+        "selector": "#s3-f5 > span:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1517.03,
+          "y": 642.64,
+          "width": 177.1500000000001,
+          "height": 37.33000000000004
+        },
+        "time": 8.734,
+        "words": 3,
+        "seconds": 0.867,
+        "floorSeconds": 1.05,
+        "measured": [
+          {
+            "time": 8.375,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 8.5,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 8.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 8.75,
+            "opacity": 0.62,
+            "heightPx": 37
+          },
+          {
+            "time": 8.875,
+            "opacity": 0.98,
+            "heightPx": 37
+          },
+          {
+            "time": 9,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 9.125,
+            "opacity": 1,
+            "heightPx": 38
+          },
+          {
+            "time": 9.25,
+            "opacity": 1,
+            "heightPx": 38
+          },
+          {
+            "time": 9.375,
+            "opacity": 1,
+            "heightPx": 38
+          },
+          {
+            "time": 9.5,
+            "opacity": 1,
+            "heightPx": 38
+          },
+          {
+            "time": 9.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9.875,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Tomatoes · Grade A\" (3 words) is on screen 0.53 s (±0.01 s), under its 1.05 s floor: hold it about 0.5 s + 0.3 s a word (1.40 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Tomatoes · Grade A",
+        "selector": "div.name",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1019.29,
+          "y": 751.26,
+          "width": 263.80999999999995,
+          "height": 38.559999999999945
+        },
+        "time": 9.07,
+        "words": 3,
+        "seconds": 0.531,
+        "floorSeconds": 1.05,
+        "measured": [
+          {
+            "time": 8.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 8.875,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9.125,
+            "opacity": 0.74,
+            "heightPx": 39
+          },
+          {
+            "time": 9.25,
+            "opacity": 0.99,
+            "heightPx": 39
+          },
+          {
+            "time": 9.375,
+            "opacity": 1,
+            "heightPx": 39
+          },
+          {
+            "time": 9.5,
+            "opacity": 1,
+            "heightPx": 39
+          },
+          {
+            "time": 9.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 9.875,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 61 text elements stay under it for 0.5 s or more, the smallest \"Live\" at 11 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Live",
+        "selector": "#s3-live",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1622.79,
+          "y": 778.57,
+          "width": 30.52,
+          "height": 13.13
+        },
+        "time": 9.125,
+        "times": [
+          0.25,
+          1,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          3,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          9.125,
+          9.125,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.875,
+          10.5,
+          10.5,
+          10.5,
+          11,
+          11,
+          11,
+          11.625,
+          11.625,
+          11.625,
+          11.625,
+          12,
+          13.375,
+          13.375,
+          13.5,
+          13.5,
+          13.75,
+          13.75,
+          14.125,
+          14.125,
+          14.375,
+          14.375,
+          14.875,
+          14.875,
+          15.125,
+          15.875,
+          18.75
+        ],
+        "fontPx": 11.26,
+        "floorPx": 28,
+        "seconds": 0.5,
+        "elements": [
+          {
+            "selector": "#s3-live",
+            "text": "Live",
+            "fontPx": 11.26,
+            "time": 9.125,
+            "seconds": 0.5
+          },
+          {
+            "selector": "#s4-best",
+            "text": "Best net",
+            "fontPx": 14.89,
+            "time": 12,
+            "seconds": 1.25
+          },
+          {
+            "selector": "#s4-row1 > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "net to you",
+            "fontPx": 17,
+            "time": 10.5,
+            "seconds": 2.75
+          },
+          {
+            "selector": "#s4-row2 > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "net to you",
+            "fontPx": 17,
+            "time": 11,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s4-row3 > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "net to you",
+            "fontPx": 17,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "span.rec-pill",
+            "text": "REC",
+            "fontPx": 18,
+            "time": 3,
+            "seconds": 3.25
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Available",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "From",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(3) > div:nth-of-type(1)",
+            "text": "Location",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(4) > div:nth-of-type(1)",
+            "text": "Status",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Reading the sentence",
+            "fontPx": 18.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.top > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "per kg",
+            "fontPx": 19,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s4-row1 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "/kg",
+            "fontPx": 19,
+            "time": 10.5,
+            "seconds": 2.75
+          },
+          {
+            "selector": "#s4-row2 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "/kg",
+            "fontPx": 19,
+            "time": 11,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s4-row3 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "/kg",
+            "fontPx": 19,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.eyebrow2",
+            "text": "Best net offer",
+            "fontPx": 19,
+            "time": 13.5,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Structured listing",
+            "fontPx": 19.02,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Voice listing",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "AI extraction preview",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "Produce",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "Quantity",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4) > span:nth-of-type(1)",
+            "text": "Available",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > span:nth-of-type(1)",
+            "text": "Location",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(6) > span:nth-of-type(1)",
+            "text": "Seeking",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.note",
+            "text": "fee and freight shown separately",
+            "fontPx": 19.98,
+            "time": 14.875,
+            "seconds": 1.75
+          },
+          {
+            "selector": "#s1-eyebrow",
+            "text": "Mandi Relay · Voice-first marketplace",
+            "fontPx": 20,
+            "time": 0.25,
+            "seconds": 2.375
+          },
+          {
+            "selector": "#s4-row1 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "12 km away · retailer",
+            "fontPx": 20,
+            "time": 10.5,
+            "seconds": 2.75
+          },
+          {
+            "selector": "#s4-row2 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "9 km away · restaurant",
+            "fontPx": 20,
+            "time": 11,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s4-row3 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "16 km away · wholesaler",
+            "fontPx": 20,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.tag > span:nth-of-type(1)",
+            "text": "Offer breakdown",
+            "fontPx": 20,
+            "time": 13.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "div.tag > span:nth-of-type(2)",
+            "text": "Kharar Fresh Mart",
+            "fontPx": 20,
+            "time": 13.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Voice listing",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Structured listing",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-f1 > span:nth-of-type(1)",
+            "text": "Produce",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-f2 > span:nth-of-type(1)",
+            "text": "Quantity",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-f3 > span:nth-of-type(1)",
+            "text": "Available",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-f4 > span:nth-of-type(1)",
+            "text": "Location",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-f5 > span:nth-of-type(1)",
+            "text": "Seeking",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "div.meta",
+            "text": "500 kg · ₹20/kg · Kharar, Mohali",
+            "fontPx": 20.85,
+            "time": 9.125,
+            "seconds": 0.5
+          },
+          {
+            "selector": "div.variety",
+            "text": "Grade A · Vegetables",
+            "fontPx": 21,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s3-left-note",
+            "text": "One spoken sentence, mapped onto the fields a marketplace actually needs. Nothing was guessed — the quantity, date and location were all in the sentence.",
+            "fontPx": 21.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s4-count",
+            "text": "3 offers",
+            "fontPx": 21.52,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Speak in Hindi, Punjabi or English",
+            "fontPx": 21.9,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s5-total > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "You receive",
+            "fontPx": 21.98,
+            "time": 14.875,
+            "seconds": 1.75
+          },
+          {
+            "selector": "#s5-decision > p:nth-of-type(1)",
+            "text": "The farmer stays in control. Nothing is committed without this click.",
+            "fontPx": 22,
+            "time": 13.5,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Every field editable before publish",
+            "fontPx": 22.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s6-honest",
+            "text": "No payment taken in this build.",
+            "fontPx": 23,
+            "time": 18.75,
+            "seconds": 1.25
+          },
+          {
+            "selector": "div.cap",
+            "text": "no form-fillingno call centreno middleman",
+            "fontPx": 24,
+            "time": 1,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "500 kg",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Tomorrow",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(3) > div:nth-of-type(2)",
+            "text": "Kharar, Mohali",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(4) > div:nth-of-type(2)",
+            "text": "Live",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.s",
+            "text": "Every offer ranked by what actually reaches the farmer.",
+            "fontPx": 24,
+            "time": 9.875,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#s5-accept-label",
+            "text": "Accept offer",
+            "fontPx": 26.78,
+            "time": 15.125,
+            "seconds": 0.75
+          },
+          {
+            "selector": "#s5-r1 > span:nth-of-type(1)",
+            "text": "Gross value",
+            "fontPx": 27,
+            "time": 13.75,
+            "seconds": 2.875
+          },
+          {
+            "selector": "#s5-r1 > span:nth-of-type(2)",
+            "text": "₹11,000",
+            "fontPx": 27,
+            "time": 13.75,
+            "seconds": 2.875
+          },
+          {
+            "selector": "#s5-r2 > span:nth-of-type(1)",
+            "text": "Platform fee (1.5%)",
+            "fontPx": 27,
+            "time": 14.125,
+            "seconds": 2.5
+          },
+          {
+            "selector": "#s5-r2 > span:nth-of-type(2)",
+            "text": "−₹165",
+            "fontPx": 27,
+            "time": 14.125,
+            "seconds": 2.5
+          },
+          {
+            "selector": "#s5-r3 > span:nth-of-type(1)",
+            "text": "Freight estimate (12 km)",
+            "fontPx": 27,
+            "time": 14.375,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s5-r3 > span:nth-of-type(2)",
+            "text": "−₹45",
+            "fontPx": 27,
+            "time": 14.375,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s5-confirmed",
+            "text": "Order confirmed",
+            "fontPx": 27,
+            "time": 15.875,
+            "seconds": 0.75
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"Your Produce. Your Market. Your Voice.\" (6 words) is on screen 1.90 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "Your Produce. Your Market. Your Voice.",
+        "selector": "#s6-tag",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 543.59,
+          "y": 658.14,
+          "width": 832.82,
+          "height": 65
+        },
+        "time": 18.102,
+        "words": 6,
+        "seconds": 1.902,
+        "floorSeconds": 2,
+        "measured": [
+          {
+            "time": 17.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 17.875,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 18,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 18.125,
+            "opacity": 0.55,
+            "heightPx": 65
+          },
+          {
+            "time": 18.25,
+            "opacity": 0.91,
+            "heightPx": 65
+          },
+          {
+            "time": 18.375,
+            "opacity": 0.99,
+            "heightPx": 65
+          },
+          {
+            "time": 18.5,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 19.5,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 19.625,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 19.75,
+            "opacity": 1,
+            "heightPx": 65
+          },
+          {
+            "time": 19.875,
+            "opacity": 1,
+            "heightPx": 65
+          }
+        ]
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 160
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

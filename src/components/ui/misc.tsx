@@ -1,39 +1,13 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** Scroll-triggered reveal. Collapses to a plain fade when motion is reduced. */
-export function Reveal({
-  children,
-  delay = 0,
-  y = 16,
-  className,
-  as = "div",
-}: {
-  children: ReactNode;
-  delay?: number;
-  y?: number;
-  className?: string;
-  as?: "div" | "section" | "li";
-}) {
-  const reduced = useReducedMotion();
-  const Comp = motion[as];
-  return (
-    <Comp
-      initial={reduced ? { opacity: 0 } : { opacity: 0, y }}
-      whileInView={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
-    >
-      {children}
-    </Comp>
-  );
-}
+/*
+ * Static layout primitives. Deliberately server components — these are imported
+ * by nearly every page, so keeping them out of a client boundary keeps the
+ * shared bundle small. Animated pieces live in `reveal.tsx`.
+ */
 
 export function EmptyState({
   icon,

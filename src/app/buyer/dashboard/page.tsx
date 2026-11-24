@@ -49,13 +49,15 @@ export default async function BuyerDashboard() {
 
   const preferred = parseJsonArray(businessProfile?.preferredCommodities);
 
-  const market = await searchListings({
-    origin: { lat: profile?.lat ?? null, lng: profile?.lng ?? null },
-    limit: 6,
-    sort: preferred.length > 0 && preferred[0] ? "distance" : "newest",
-  });
-
-  const leaders = await highestBids(auctions.map((auction) => auction.id));
+  // Independent of each other, so they share one round trip instead of two.
+  const [market, leaders] = await Promise.all([
+    searchListings({
+      origin: { lat: profile?.lat ?? null, lng: profile?.lng ?? null },
+      limit: 6,
+      sort: preferred.length > 0 && preferred[0] ? "distance" : "newest",
+    }),
+    highestBids(auctions.map((auction) => auction.id)),
+  ]);
 
   const openOffers = offers.filter((offer) => offer.status === "PENDING" || offer.status === "COUNTERED");
   const awaitingMe = openOffers.filter((offer) => offer.actorRole === "FARMER");

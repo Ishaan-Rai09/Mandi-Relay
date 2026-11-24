@@ -1,0 +1,1432 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Mandi Relay — One Sentence</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Manrope";
+        src: url("assets/fonts/manrope-latin-wght-normal.woff2") format("woff2");
+        font-weight: 200 800;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/inter-latin-wght-normal.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: block;
+      }
+
+      :root {
+        --forest-950: #0e2419;
+        --forest-900: #132f21;
+        --forest-800: #183d2b;
+        --forest-700: #1f4d37;
+        --forest-600: #2a6147;
+        --forest-500: #3a7a5b;
+        --forest-100: #dfe9e2;
+        --forest-50: #eff4f0;
+        --ivory: #f5f3ec;
+        --ivory-200: #ece8dc;
+        --ivory-300: #ded9c9;
+        --charcoal: #151a17;
+        --charcoal-500: #5b655f;
+        --gold: #f4b942;
+        --gold-700: #a97b12;
+        --sage-200: #c9cfc9;
+        --white: #fffdf8;
+        --display: "Manrope", "Segoe UI", sans-serif;
+        --body: "Inter", "Segoe UI", sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--forest-950);
+        font-family: var(--body);
+        color: var(--ivory);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--forest-950);
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      /* ── Persistent background ───────────────────────────────────── */
+      #bg {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 16% 18%, rgba(58, 122, 91, 0.32), transparent 52%),
+          radial-gradient(circle at 84% 82%, rgba(244, 185, 66, 0.13), transparent 48%),
+          var(--forest-950);
+      }
+      #bg-grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at 1px 1px, rgba(245, 243, 236, 0.075) 1px, transparent 0);
+        background-size: 36px 36px;
+      }
+      #bg-glow-a {
+        position: absolute;
+        width: 980px;
+        height: 980px;
+        left: -320px;
+        top: -360px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(58, 122, 91, 0.30), transparent 68%);
+      }
+      #bg-glow-b {
+        position: absolute;
+        width: 820px;
+        height: 820px;
+        right: -260px;
+        bottom: -320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(244, 185, 66, 0.16), transparent 70%);
+      }
+      #bg-rings {
+        position: absolute;
+        right: -160px;
+        top: 40px;
+        width: 760px;
+        height: 760px;
+        opacity: 0.55;
+      }
+      #bg-hairlines {
+        position: absolute;
+        inset: 0;
+      }
+      #bg-hairlines span {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: rgba(245, 243, 236, 0.10);
+      }
+      #bg-hairlines span:first-child {
+        left: 96px;
+      }
+      #bg-hairlines span:last-child {
+        right: 96px;
+      }
+      #progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 5px;
+        background: rgba(245, 243, 236, 0.10);
+      }
+      #progress-fill {
+        width: 100%;
+        height: 100%;
+        background: var(--gold);
+        transform-origin: left center;
+      }
+
+      /* ── Shared type ─────────────────────────────────────────────── */
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--sage-200);
+      }
+      .eyebrow .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--gold);
+      }
+      .display {
+        font-family: var(--display);
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        line-height: 0.94;
+      }
+
+      /* ── Scene 1 — Hook ──────────────────────────────────────────── */
+      #s1-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 140px;
+      }
+      #s1-title {
+        margin-top: 34px;
+        font-size: 176px;
+        color: var(--ivory);
+      }
+      #s1-rule {
+        width: 420px;
+        height: 7px;
+        margin-top: 34px;
+        border-radius: 4px;
+        background: var(--gold);
+        transform-origin: left center;
+      }
+      #s1-sub {
+        margin-top: 36px;
+        font-family: var(--display);
+        font-size: 48px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--gold);
+      }
+      #s1-wave {
+        margin-top: 46px;
+        width: 560px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .bar {
+        display: block;
+        width: 7px;
+        border-radius: 4px;
+        background: var(--sage-200);
+        transform-origin: center center;
+      }
+      #s1-side {
+        position: absolute;
+        right: 120px;
+        top: 50%;
+        margin-top: -120px;
+        width: 420px;
+        text-align: right;
+      }
+      #s1-side .num {
+        font-family: var(--display);
+        font-size: 96px;
+        font-weight: 800;
+        color: var(--ivory);
+        letter-spacing: -0.04em;
+      }
+      #s1-side .cap {
+        margin-top: 8px;
+        font-size: 24px;
+        line-height: 1.4;
+        color: var(--sage-200);
+      }
+      #s1-side .cap span {
+        display: block;
+      }
+      #s1-side .hair {
+        margin: 22px 0 0 auto;
+        width: 220px;
+        height: 2px;
+        background: rgba(245, 243, 236, 0.28);
+      }
+
+      /* ── Voice panel (scenes 2 & 3) ──────────────────────────────── */
+      .center-stage {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+      .panel {
+        width: 1560px;
+        height: 742px;
+        border-radius: 20px;
+        background: var(--ivory);
+        border: 2px solid var(--ivory-300);
+        box-shadow: 0 60px 130px -50px rgba(0, 0, 0, 0.75);
+        overflow: hidden;
+      }
+      .panel-head {
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 36px;
+        background: var(--ivory-200);
+        border-bottom: 2px solid var(--ivory-300);
+      }
+      .panel-head .left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .panel-head .live-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--forest-600);
+      }
+      .panel-head .label {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      .panel-head .right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 20px;
+        color: var(--charcoal-500);
+      }
+      .panel-head .right svg {
+        width: 22px;
+        height: 22px;
+      }
+      .panel-body {
+        display: grid;
+        grid-template-columns: 1fr 0.95fr;
+        height: 660px;
+      }
+      .panel-left {
+        padding: 38px 46px;
+        border-right: 2px solid var(--ivory-200);
+      }
+      .panel-right {
+        padding: 32px 40px;
+        background: var(--white);
+      }
+
+      .mic-row {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+      .mic {
+        position: relative;
+        width: 92px;
+        height: 92px;
+        flex: none;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: var(--forest-800);
+        color: var(--ivory);
+      }
+      .mic svg {
+        width: 44px;
+        height: 44px;
+      }
+      #s2-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 3px solid var(--forest-500);
+      }
+      .mic-title {
+        font-family: var(--display);
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--charcoal);
+      }
+      .mic-sub {
+        margin-top: 6px;
+        font-size: 22px;
+        color: var(--charcoal-500);
+      }
+      .transcript {
+        margin-top: 28px;
+        height: 296px;
+        padding: 22px 26px;
+        border-radius: 10px;
+        background: var(--ivory);
+        border: 2px solid var(--ivory-200);
+        font-size: 30px;
+        line-height: 1.52;
+        color: var(--charcoal);
+        white-space: pre-wrap;
+      }
+      .transcript .ch {
+        display: inline;
+      }
+      .transcript .t-line {
+        display: block;
+      }
+      .wave-row {
+        margin-top: 22px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .wave {
+        height: 64px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .rec-pill {
+        flex: none;
+        padding: 7px 14px;
+        border-radius: 5px;
+        background: #fbe9e7;
+        color: #a3352b;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+      }
+
+      .right-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      .right-eyebrow svg {
+        width: 20px;
+        height: 20px;
+      }
+      .field-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        height: 72px;
+        border-bottom: 1px solid var(--ivory-200);
+      }
+      .field-row .key {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      .field-row .val {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 13px;
+        border-radius: 5px;
+        background: var(--forest-50);
+        color: var(--forest-800);
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      .skel {
+        display: block;
+        width: 132px;
+        height: 22px;
+        border-radius: 4px;
+        background: var(--ivory-200);
+      }
+
+      #s2-panel .panel-right {
+        display: flex;
+        flex-direction: column;
+      }
+      #s2-status {
+        margin-top: auto;
+        padding-top: 26px;
+      }
+      #s2-status .s-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        color: var(--charcoal-500);
+      }
+      #s2-status .s-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--forest-600);
+      }
+      #s2-status .s-bar {
+        margin-top: 14px;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--ivory-200);
+        overflow: hidden;
+      }
+      #s2-bar-fill {
+        width: 100%;
+        height: 100%;
+        border-radius: 3px;
+        background: var(--forest-600);
+        transform-origin: left center;
+      }
+
+      /* Scene 3 */
+      #s3-cam {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        transform-origin: center center;
+      }
+      #s3-panel .panel-right {
+        padding: 26px 40px;
+      }
+      #s3-panel .field-row {
+        height: 80px;
+      }
+      #s3-panel .field-row .val {
+        font-size: 30px;
+        padding: 7px 16px;
+      }
+      #s3-ready {
+        margin-top: 20px;
+        padding: 18px 22px;
+        border-radius: 10px;
+        background: var(--forest-50);
+        border: 2px solid rgba(31, 77, 55, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      #s3-ready .name {
+        font-family: var(--display);
+        font-size: 27px;
+        font-weight: 800;
+        color: var(--forest-800);
+      }
+      #s3-ready .meta {
+        margin-top: 4px;
+        font-size: 20px;
+        color: var(--forest-700);
+      }
+      .live-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 4px;
+        background: var(--gold);
+        color: var(--charcoal);
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      #s3-left-note {
+        margin-top: 24px;
+        font-size: 21px;
+        line-height: 1.5;
+        color: var(--charcoal-500);
+      }
+      #s3-panel .panel-left {
+        display: flex;
+        flex-direction: column;
+      }
+      #s3-quote {
+        margin-top: auto;
+        padding: 24px 28px;
+        border-radius: 10px;
+        background: var(--ivory);
+        border: 2px solid var(--ivory-200);
+        border-left: 4px solid var(--gold);
+      }
+      #s3-quote .q-label {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      #s3-quote .q-text {
+        margin-top: 10px;
+        font-family: var(--display);
+        font-size: 30px;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+        line-height: 1.42;
+        color: var(--charcoal);
+      }
+      #s3-quote .q-foot {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 19px;
+        color: var(--forest-700);
+      }
+      #s3-quote .q-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--forest-600);
+      }
+
+      /* ── Scene 4 — Offers ────────────────────────────────────────── */
+      #s4-grid {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: 540px 1fr;
+        gap: 64px;
+        align-items: center;
+        padding: 0 140px;
+      }
+      .listing-mini {
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--white);
+        border: 2px solid var(--ivory-300);
+        box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.6);
+      }
+      .tile {
+        height: 300px;
+        background: #e8efe6;
+        display: grid;
+        place-items: center;
+      }
+      .tile svg {
+        width: 300px;
+        height: 300px;
+      }
+      .listing-body {
+        padding: 24px 26px 26px;
+      }
+      .listing-body .top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .listing-body h3 {
+        font-family: var(--display);
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--charcoal);
+      }
+      .listing-body .variety {
+        margin-top: 4px;
+        font-size: 21px;
+        color: var(--charcoal-500);
+      }
+      .listing-body .price {
+        text-align: right;
+      }
+      .listing-body .price b {
+        display: block;
+        font-family: var(--display);
+        font-size: 34px;
+        font-weight: 800;
+        color: var(--forest-800);
+      }
+      .listing-body .price span {
+        font-size: 19px;
+        color: var(--charcoal-500);
+      }
+      .listing-meta {
+        margin-top: 20px;
+        padding-top: 18px;
+        border-top: 2px solid var(--ivory-200);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .listing-meta .k {
+        font-size: 18px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      .listing-meta .v {
+        margin-top: 3px;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--charcoal);
+      }
+
+      #s4-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 26px;
+      }
+      #s4-head .t {
+        font-family: var(--display);
+        font-size: 62px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--ivory);
+      }
+      #s4-head .s {
+        margin-top: 8px;
+        font-size: 24px;
+        color: var(--sage-200);
+      }
+      #s4-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 18px;
+        border-radius: 7px;
+        background: var(--gold);
+        color: var(--charcoal);
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .offer {
+        display: grid;
+        grid-template-columns: 1fr 220px 240px;
+        align-items: center;
+        gap: 20px;
+        height: 122px;
+        padding: 0 28px;
+        border-radius: 12px;
+        background: var(--white);
+        border: 2px solid var(--ivory-300);
+        margin-bottom: 18px;
+      }
+      .offer .buyer {
+        font-family: var(--display);
+        font-size: 29px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: var(--charcoal);
+      }
+      .offer .dist {
+        margin-top: 4px;
+        font-size: 20px;
+        color: var(--charcoal-500);
+      }
+      .offer .price {
+        text-align: right;
+        font-family: var(--display);
+        font-size: 31px;
+        font-weight: 800;
+        color: var(--charcoal);
+      }
+      .offer .price span {
+        font-family: var(--body);
+        font-size: 19px;
+        font-weight: 500;
+        color: var(--charcoal-500);
+      }
+      .offer .net {
+        text-align: right;
+        font-family: var(--display);
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--forest-700);
+      }
+      .offer .net span {
+        display: block;
+        font-family: var(--body);
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      #s4-best {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        padding: 5px 11px;
+        border-radius: 4px;
+        background: var(--gold);
+        color: var(--charcoal);
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      /* ── Scene 5 — Decide ────────────────────────────────────────── */
+      #s5-grid {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: 860px 640px;
+        gap: 60px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 120px;
+      }
+      #s5-receipt {
+        background: var(--white);
+        border: 2px solid var(--ivory-300);
+        border-radius: 16px;
+        padding: 40px 44px;
+        box-shadow: 0 50px 110px -50px rgba(0, 0, 0, 0.65);
+      }
+      #s5-receipt .tag {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      #s5-receipt h3 {
+        margin-top: 14px;
+        font-family: var(--display);
+        font-size: 44px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--charcoal);
+      }
+      .receipt-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 19px 0;
+        border-bottom: 1px solid var(--ivory-200);
+        font-size: 27px;
+        color: var(--charcoal);
+      }
+      .receipt-row .k {
+        color: var(--charcoal-500);
+      }
+      .receipt-row .v {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+      #s5-total {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        padding-top: 26px;
+      }
+      #s5-total .k {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      #s5-total .v {
+        font-family: var(--display);
+        font-size: 78px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--forest-800);
+        line-height: 0.9;
+        font-variant-numeric: tabular-nums;
+      }
+      #s5-total .note {
+        margin-top: 8px;
+        font-size: 20px;
+        color: var(--charcoal-500);
+        text-align: right;
+      }
+
+      #s5-decision {
+        position: relative;
+        background: var(--ivory);
+        border: 2px solid var(--ivory-300);
+        border-radius: 16px;
+        padding: 38px 40px 40px;
+        box-shadow: 0 50px 110px -50px rgba(0, 0, 0, 0.65);
+      }
+      #s5-decision .eyebrow2 {
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--charcoal-500);
+      }
+      #s5-decision h3 {
+        margin-top: 14px;
+        font-family: var(--display);
+        font-size: 40px;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: var(--charcoal);
+      }
+      #s5-decision p {
+        margin-top: 12px;
+        font-size: 22px;
+        line-height: 1.45;
+        color: var(--charcoal-500);
+      }
+      #s5-accept {
+        position: relative;
+        margin-top: 30px;
+        width: 100%;
+        height: 78px;
+        border: none;
+        border-radius: 9px;
+        background: var(--forest-800);
+        color: var(--ivory);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      #s5-accept-label,
+      #s5-confirmed {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-family: var(--display);
+        font-size: 27px;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+      }
+      #s5-accept-label svg,
+      #s5-confirmed svg {
+        width: 28px;
+        height: 28px;
+      }
+      #s5-confirmed {
+        color: var(--charcoal);
+      }
+      #s5-cursor {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 50px;
+        height: 50px;
+        filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+      }
+      #s5-cursor svg {
+        width: 50px;
+        height: 50px;
+      }
+
+      /* ── Scene 6 — Outro ─────────────────────────────────────────── */
+      #s6-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      #s6-mark {
+        width: 132px;
+        height: 132px;
+      }
+      #s6-word {
+        margin-top: 30px;
+        font-family: var(--display);
+        font-size: 112px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ivory);
+        line-height: 1;
+      }
+      #s6-rule {
+        width: 560px;
+        height: 5px;
+        margin-top: 26px;
+        background: var(--gold);
+        transform-origin: center center;
+      }
+      #s6-tag {
+        margin-top: 30px;
+        font-family: var(--display);
+        font-size: 48px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--ivory);
+      }
+      #s6-honest {
+        margin-top: 22px;
+        font-size: 23px;
+        letter-spacing: 0.02em;
+        color: var(--sage-200);
+      }
+      #s6-glow {
+        position: absolute;
+        width: 900px;
+        height: 500px;
+        left: 50%;
+        top: 50%;
+        margin-left: -450px;
+        margin-top: -250px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(244, 185, 66, 0.18), transparent 66%);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Persistent background -->
+      <div id="bg"></div>
+      <div id="bg-grid"></div>
+      <div id="bg-glow-a"></div>
+      <div id="bg-glow-b"></div>
+      <svg id="bg-rings" viewBox="0 0 760 760" fill="none" aria-hidden="true" data-layout-allow-overflow>
+        <circle cx="380" cy="380" r="180" stroke="#f4b942" stroke-opacity="0.14" stroke-width="2" />
+        <circle cx="380" cy="380" r="260" stroke="#f5f3ec" stroke-opacity="0.08" stroke-width="2" />
+        <circle cx="380" cy="380" r="340" stroke="#f4b942" stroke-opacity="0.08" stroke-width="2" />
+        <circle cx="380" cy="380" r="420" stroke="#f5f3ec" stroke-opacity="0.05" stroke-width="2" />
+      </svg>
+      <div id="bg-hairlines"><span></span><span></span></div>
+      <div id="progress-track"><div id="progress-fill"></div></div>
+
+      <!-- ── Scene 1 — Hook ─────────────────────────────────────── -->
+      <section id="s1" class="clip scene" data-start="0" data-duration="2.6" data-track-index="0">
+        <div id="s1-inner">
+          <div id="s1-eyebrow" class="eyebrow"><span class="dot"></span>Mandi Relay · Voice-first marketplace</div>
+          <h1 id="s1-title" class="display">ONE SENTENCE.</h1>
+          <div id="s1-rule"></div>
+          <p id="s1-sub">That's the whole form.</p>
+          <div id="s1-wave"></div>
+        </div>
+        <div id="s1-side">
+          <div class="num">₹0</div>
+          <div class="cap"><span>no form-filling</span><span>no call centre</span><span>no middleman</span></div>
+          <div class="hair"></div>
+        </div>
+      </section>
+
+      <!-- ── Scene 2 — Speak ────────────────────────────────────── -->
+      <section id="s2" class="clip scene" data-start="2.6" data-duration="3.6" data-track-index="1">
+        <div class="center-stage">
+          <div id="s2-panel" class="panel">
+            <div class="panel-head">
+              <div class="left">
+                <span class="live-dot"></span>
+                <span class="label">Voice listing</span>
+              </div>
+              <div class="right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
+                </svg>
+                AI extraction preview
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="panel-left">
+                <div class="mic-row">
+                  <div class="mic">
+                    <div id="s2-ring"></div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                      <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+                      <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="mic-title">Listening…</div>
+                    <div class="mic-sub">Speak in Hindi, Punjabi or English</div>
+                  </div>
+                </div>
+                <div id="s2-transcript" class="transcript"></div>
+                <div class="wave-row">
+                  <div id="s2-wave" class="wave"></div>
+                  <span class="rec-pill">REC</span>
+                </div>
+              </div>
+              <div class="panel-right">
+                <div class="right-eyebrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg>
+                  Reading the sentence
+                </div>
+                <div class="field-row"><span class="key">Produce</span><span class="skel"></span></div>
+                <div class="field-row"><span class="key">Quantity</span><span class="skel"></span></div>
+                <div class="field-row"><span class="key">Available</span><span class="skel"></span></div>
+                <div class="field-row"><span class="key">Location</span><span class="skel"></span></div>
+                <div class="field-row"><span class="key">Seeking</span><span class="skel"></span></div>
+                <div id="s2-status">
+                  <div class="s-row"><span class="s-dot"></span>Extracting fields…</div>
+                  <div class="s-bar"><div id="s2-bar-fill"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Scene 3 — Extract ──────────────────────────────────── -->
+      <section id="s3" class="clip scene" data-start="6.2" data-duration="3.4" data-track-index="2">
+        <div id="s3-cam" data-layout-allow-overflow>
+          <div id="s3-panel" class="panel">
+            <div class="panel-head">
+              <div class="left">
+                <span class="live-dot"></span>
+                <span class="label">Voice listing</span>
+              </div>
+              <div class="right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Structured listing
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="panel-left">
+                <div class="mic-row">
+                  <div class="mic">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="mic-title">Listing ready</div>
+                    <div class="mic-sub">Every field editable before publish</div>
+                  </div>
+                </div>
+                <p id="s3-left-note">
+                  Nothing guessed. Every field came from your sentence.
+                </p>
+                <div id="s3-quote">
+                  <div class="q-label">The sentence</div>
+                  <div class="q-text">“Kal subah, 500 kilo fresh tomatoes.</div>
+                  <div class="q-text">Mohali. 20 rupaye se achha.”</div>
+                  <div class="q-foot"><span class="q-dot"></span>Mapped into the fields on the right</div>
+                </div>
+              </div>
+              <div class="panel-right">
+                <div class="right-eyebrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h10" />
+                  </svg>
+                  Structured listing
+                </div>
+                <div id="s3-f1" class="field-row"><span class="key">Produce</span><span class="val">Tomatoes</span></div>
+                <div id="s3-f2" class="field-row"><span class="key">Quantity</span><span class="val">500 kg</span></div>
+                <div id="s3-f3" class="field-row"><span class="key">Available</span><span class="val">Tomorrow, morning</span></div>
+                <div id="s3-f4" class="field-row"><span class="key">Location</span><span class="val">Mohali, Punjab</span></div>
+                <div id="s3-f5" class="field-row"><span class="key">Seeking</span><span class="val">₹20+ per kg</span></div>
+                <div id="s3-ready">
+                  <div>
+                    <div class="name">Tomatoes · Grade A</div>
+                    <div class="meta">500 kg · ₹20/kg · Kharar, Mohali</div>
+                  </div>
+                  <span id="s3-live" class="live-tag">Live</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Scene 4 — Offers ───────────────────────────────────── -->
+      <section id="s4" class="clip scene" data-start="9.6" data-duration="3.6" data-track-index="3">
+        <div id="s4-grid">
+          <div id="s4-left" class="listing-mini">
+            <div class="tile">
+              <svg viewBox="0 0 192 192" aria-hidden="true">
+                <path d="M96 156c-34-18-44-56-30-92 34 8 52 34 52 66 0 12-6 22-22 26z" fill="#1f4d37" opacity="0.9" />
+                <path d="M96 152c26-16 34-46 24-76-26 8-38 30-38 54 0 10 4 18 14 22z" fill="#7ba888" opacity="0.8" />
+                <path d="M96 156c0-32 2-58 8-82" stroke="#ffffff" stroke-width="2" opacity="0.35" fill="none" />
+              </svg>
+            </div>
+            <div class="listing-body">
+              <div class="top">
+                <div>
+                  <h3>Tomatoes</h3>
+                  <div class="variety">Grade A · Vegetables</div>
+                </div>
+                <div class="price"><b>₹20</b><span>per kg</span></div>
+              </div>
+              <div class="listing-meta">
+                <div><div class="k">Available</div><div class="v">500 kg</div></div>
+                <div><div class="k">From</div><div class="v">Tomorrow</div></div>
+                <div><div class="k">Location</div><div class="v">Kharar, Mohali</div></div>
+                <div><div class="k">Status</div><div class="v">Live</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="s4-right">
+            <div id="s4-head">
+              <div>
+                <div class="t">The market answers.</div>
+                <div class="s">Every offer ranked by what actually reaches the farmer.</div>
+              </div>
+              <span id="s4-count">3 offers</span>
+            </div>
+
+            <div id="s4-row1" class="offer">
+              <div>
+                <div class="buyer">Kharar Fresh Mart</div>
+                <div class="dist">12 km away · retailer</div>
+                <span id="s4-best">Best net</span>
+              </div>
+              <div class="price">₹22<span> /kg</span></div>
+              <div class="net">₹10,790<span>net to you</span></div>
+            </div>
+
+            <div id="s4-row2" class="offer">
+              <div>
+                <div class="buyer">Mohali Kitchen Co</div>
+                <div class="dist">9 km away · restaurant</div>
+              </div>
+              <div class="price">₹21.5<span> /kg</span></div>
+              <div class="net">₹10,544<span>net to you</span></div>
+            </div>
+
+            <div id="s4-row3" class="offer">
+              <div>
+                <div class="buyer">Banur Wholesale</div>
+                <div class="dist">16 km away · wholesaler</div>
+              </div>
+              <div class="price">₹21<span> /kg</span></div>
+              <div class="net">₹10,283<span>net to you</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Scene 5 — Decide ───────────────────────────────────── -->
+      <section id="s5" class="clip scene" data-start="13.2" data-duration="3.4" data-track-index="4">
+        <div id="s5-grid">
+          <div id="s5-receipt">
+            <div class="tag"><span>Offer breakdown</span><span>Kharar Fresh Mart</span></div>
+            <h3>₹22/kg × 500 kg</h3>
+            <div id="s5-r1" class="receipt-row"><span class="k">Gross value</span><span class="v">₹11,000</span></div>
+            <div id="s5-r2" class="receipt-row"><span class="k">Platform fee (1.5%)</span><span class="v">−₹165</span></div>
+            <div id="s5-r3" class="receipt-row"><span class="k">Freight estimate (12 km)</span><span class="v">−₹45</span></div>
+            <div id="s5-total">
+              <div>
+                <div class="k">You receive</div>
+                <div class="note">fee and freight shown separately</div>
+              </div>
+              <div class="v">₹10,790</div>
+            </div>
+          </div>
+
+          <div id="s5-decision">
+            <div class="eyebrow2">Best net offer</div>
+            <h3>Accept, counter or hold.</h3>
+            <p>The farmer stays in control. Nothing is committed without this click.</p>
+            <button id="s5-accept" type="button">
+              <span id="s5-accept-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Accept offer
+              </span>
+              <span id="s5-confirmed">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Order confirmed
+              </span>
+            </button>
+            <div id="s5-cursor">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 2.5 20.5 11l-7 1.6L9.6 20 4 2.5Z" fill="#f5f3ec" stroke="#151a17" stroke-width="1.4" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Scene 6 — Outro ────────────────────────────────────── -->
+      <section id="s6" class="clip scene" data-start="16.6" data-duration="3.4" data-track-index="5">
+        <div id="s6-glow"></div>
+        <div id="s6-inner">
+          <svg id="s6-mark" viewBox="0 0 28 28" aria-hidden="true">
+            <rect width="28" height="28" rx="6" fill="#f5f3ec" />
+            <path id="s6-stroke1" d="M7 19.5c0-4 2.6-7.2 6.5-7.2" fill="none" stroke="#183d2b" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="14" stroke-dashoffset="14" />
+            <path id="s6-stroke2" d="M21 19.5c0-4-2.6-7.2-6.5-7.2" fill="none" stroke="#183d2b" stroke-width="1.8" stroke-linecap="round" opacity="0.55" stroke-dasharray="14" stroke-dashoffset="14" />
+            <circle id="s6-dot" cx="14" cy="9.2" r="2.4" fill="#f4b942" />
+          </svg>
+          <div id="s6-word" class="display">Mandi Relay</div>
+          <div id="s6-rule"></div>
+          <div id="s6-tag">Your Produce. Your Market. Your Voice.</div>
+          <div id="s6-honest">No payment taken in this build.</div>
+        </div>
+      </section>
+
+      <!-- ── Audio ──────────────────────────────────────────────── -->
+      <audio
+        id="music"
+        src="assets/music/happy-beats-business-moves-vol-10-by-ende-dot-app.mp3"
+        data-start="0"
+        data-duration="20"
+        data-track-index="10"
+        data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":0},{"t":0.3,"v":0.34},{"t":9.5,"v":0.34},{"t":9.7,"v":0.30},{"t":13.0,"v":0.30},{"t":13.2,"v":0.24},{"t":15.55,"v":0.24},{"t":15.75,"v":0.32},{"t":19.3,"v":0.32},{"t":20,"v":0}]}]}'
+      ></audio>
+
+      <audio id="sfx-hook" src="assets/sfx/impact/impactSoft_medium_001.ogg" data-start="0.06" data-duration="0.19" data-track-index="11" data-volume="0.55"></audio>
+      <audio id="sfx-mic" src="assets/sfx/interface/click_001.ogg" data-start="2.62" data-duration="0.10" data-track-index="12" data-volume="0.5"></audio>
+      <audio id="sfx-key1" src="assets/sfx/keyboard/keypress-001.wav" data-start="3.30" data-duration="0.25" data-track-index="13" data-volume="0.28"></audio>
+      <audio id="sfx-key2" src="assets/sfx/keyboard/keypress-003.wav" data-start="3.72" data-duration="0.25" data-track-index="14" data-volume="0.26"></audio>
+      <audio id="sfx-key3" src="assets/sfx/keyboard/keypress-005.wav" data-start="4.14" data-duration="0.25" data-track-index="15" data-volume="0.28"></audio>
+      <audio id="sfx-key4" src="assets/sfx/keyboard/keypress-002.wav" data-start="4.56" data-duration="0.25" data-track-index="16" data-volume="0.26"></audio>
+      <audio id="sfx-key5" src="assets/sfx/keyboard/keypress-006.wav" data-start="4.98" data-duration="0.25" data-track-index="17" data-volume="0.28"></audio>
+      <audio id="sfx-f1" src="assets/sfx/interface/drop_001.ogg" data-start="6.70" data-duration="0.11" data-track-index="18" data-volume="0.45"></audio>
+      <audio id="sfx-f2" src="assets/sfx/interface/drop_002.ogg" data-start="7.05" data-duration="0.19" data-track-index="19" data-volume="0.45"></audio>
+      <audio id="sfx-f3" src="assets/sfx/interface/drop_003.ogg" data-start="7.40" data-duration="0.19" data-track-index="20" data-volume="0.45"></audio>
+      <audio id="sfx-f4" src="assets/sfx/interface/drop_001.ogg" data-start="7.75" data-duration="0.11" data-track-index="21" data-volume="0.45"></audio>
+      <audio id="sfx-f5" src="assets/sfx/interface/drop_002.ogg" data-start="8.10" data-duration="0.19" data-track-index="22" data-volume="0.45"></audio>
+      <audio id="sfx-live" src="assets/sfx/interface/drop_003.ogg" data-start="8.65" data-duration="0.19" data-track-index="23" data-volume="0.55"></audio>
+      <audio id="sfx-o1" src="assets/sfx/interface/drop_001.ogg" data-start="10.38" data-duration="0.11" data-track-index="24" data-volume="0.5"></audio>
+      <audio id="sfx-o2" src="assets/sfx/interface/drop_002.ogg" data-start="10.93" data-duration="0.19" data-track-index="25" data-volume="0.5"></audio>
+      <audio id="sfx-o3" src="assets/sfx/interface/drop_003.ogg" data-start="11.47" data-duration="0.19" data-track-index="26" data-volume="0.5"></audio>
+      <audio id="sfx-click" src="assets/sfx/ui/mouseclick1.ogg" data-start="15.60" data-duration="0.06" data-track-index="27" data-volume="0.6"></audio>
+      <audio id="sfx-confirm" src="assets/sfx/impact/impactBell_heavy_003.ogg" data-start="15.75" data-duration="0.65" data-track-index="28" data-volume="0.5"></audio>
+      <audio id="sfx-word" src="assets/sfx/impact/impactBell_heavy_000.ogg" data-start="16.85" data-duration="1.48" data-track-index="29" data-volume="0.45"></audio>
+    </div>
+
+    <script>
+      /* ── Deterministic DOM generation ─────────────────────────────── */
+      (function buildWaves() {
+        const s1 = document.getElementById("s1-wave");
+        for (let i = 0; i < 46; i += 1) {
+          const bar = document.createElement("span");
+          bar.className = "bar s1-bar";
+          const h = 16 + Math.round(42 * Math.abs(Math.sin(i * 0.62 + 0.4)));
+          bar.style.height = h + "px";
+          s1.appendChild(bar);
+        }
+        const s2 = document.getElementById("s2-wave");
+        for (let i = 0; i < 40; i += 1) {
+          const bar = document.createElement("span");
+          bar.className = "bar s2-bar";
+          const h = 10 + Math.round(46 * Math.abs(Math.sin(i * 0.71 + 0.2)));
+          bar.style.height = h + "px";
+          s2.appendChild(bar);
+        }
+      })();
+
+      (function buildTranscript() {
+        const lines = [
+          "Mere paas kal subah 500 kilo fresh tomatoes.",
+          "Mohali.",
+          "20 rupaye se achha rate chahiye.",
+        ];
+        const box = document.getElementById("s2-transcript");
+        for (const text of lines) {
+          const line = document.createElement("div");
+          line.className = "t-line";
+          for (const ch of text) {
+            const span = document.createElement("span");
+            span.className = "ch";
+            span.textContent = ch;
+            line.appendChild(span);
+          }
+          box.appendChild(line);
+        }
+      })();
+
+      /* ── Seekable timeline ────────────────────────────────────────── */
+      const tl = gsap.timeline({ paused: true });
+      const chars = gsap.utils.toArray("#s2-transcript .ch");
+
+      /* Ambient background */
+      tl.fromTo("#bg-glow-a", { scale: 0.92, opacity: 0.6 }, { scale: 1.14, opacity: 1, duration: 6.5, ease: "sine.inOut", repeat: 2, yoyo: true }, 0);
+      tl.fromTo("#bg-glow-b", { scale: 1.08, opacity: 0.7 }, { scale: 0.92, opacity: 1, duration: 6.5, ease: "sine.inOut", repeat: 2, yoyo: true }, 0);
+      tl.fromTo("#bg-rings", { rotation: -4, scale: 0.96 }, { rotation: 5, scale: 1.04, duration: 9, ease: "sine.inOut", repeat: 1, yoyo: true }, 0);
+      tl.fromTo("#progress-fill", { scaleX: 0 }, { scaleX: 1, duration: 20, ease: "none" }, 0);
+
+      /* Scene 1 — Hook */
+      tl.fromTo("#s1-eyebrow", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.08);
+      tl.fromTo("#s1-title", { opacity: 0, y: 40, scale: 1.05 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power4.out" }, 0.12);
+      tl.fromTo("#s1-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power3.out" }, 0.34);
+      tl.fromTo("#s1-sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, 0.85);
+      tl.fromTo("#s1-wave .s1-bar", { scaleY: 0.18 }, { scaleY: 1, duration: 0.45, ease: "power2.out", stagger: 0.012 }, 0.2);
+      tl.fromTo("#s1-side", { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 0.9);
+
+      /* Scene 2 — Speak */
+      tl.fromTo("#s2-panel", { opacity: 0, y: 30, scale: 0.985 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, 2.62);
+      tl.fromTo("#s2-ring", { scale: 1, opacity: 0.7 }, { scale: 1.85, opacity: 0, duration: 1.05, ease: "power1.out", repeat: 2 }, 2.85);
+      tl.fromTo(chars, { opacity: 0 }, { opacity: 1, duration: 0.001, stagger: 0.015, ease: "none" }, 2.9);
+      tl.fromTo("#s2-bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 2.95, ease: "none" }, 2.95);
+      tl.fromTo("#s2-wave .s2-bar", { scaleY: 0.22 }, { scaleY: 1, duration: 0.4, ease: "power2.out", stagger: 0.01 }, 2.85);
+      tl.fromTo("#s2 .skel", { opacity: 0.35 }, { opacity: 0.9, duration: 0.45, ease: "sine.inOut", repeat: 3, yoyo: true, stagger: 0.07 }, 3.0);
+      tl.fromTo("#s2 .rec-pill", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 2.9);
+
+      /* Scene 3 — Extract */
+      tl.fromTo("#s3-panel", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, 6.22);
+      tl.fromTo("#s3-cam", { scale: 1, x: 0 }, { scale: 1.045, x: -30, duration: 3.0, ease: "none" }, 6.28);
+      tl.fromTo("#s3-quote", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 6.55);
+      tl.fromTo("#s3-f1", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 6.70);
+      tl.fromTo("#s3-f2", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 7.05);
+      tl.fromTo("#s3-f3", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 7.40);
+      tl.fromTo("#s3-f4", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 7.75);
+      tl.fromTo("#s3-f5", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 8.10);
+      tl.fromTo("#s3-ready", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, 8.45);
+      tl.fromTo("#s3-live", { scale: 0.6 }, { scale: 1, duration: 0.35, ease: "back.out(2)" }, 8.65);
+
+      /* Scene 4 — Offers */
+      tl.fromTo("#s4-left", { opacity: 0, x: -46 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 9.65);
+      tl.fromTo("#s4-head", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 9.78);
+      tl.fromTo("#s4-row1", { opacity: 0, x: 44 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, 10.38);
+      tl.fromTo("#s4-row2", { opacity: 0, x: 44 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, 10.93);
+      tl.fromTo("#s4-row3", { opacity: 0, x: 44 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, 11.47);
+      tl.fromTo("#s4-count", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, 11.5);
+      tl.fromTo("#s4-best", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, 11.95);
+      tl.to("#s4-row1", { borderColor: "#f4b942", boxShadow: "0 0 0 4px rgba(244,185,66,0.30)", duration: 0.3, ease: "power2.out" }, 11.9);
+
+      /* Scene 5 — Decide */
+      tl.fromTo("#s5-receipt", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, 13.22);
+      tl.fromTo("#s5-decision", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.42, ease: "power3.out" }, 13.32);
+      tl.fromTo("#s5-r1", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.28, ease: "power2.out" }, 13.6);
+      tl.fromTo("#s5-r2", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.28, ease: "power2.out" }, 13.95);
+      tl.fromTo("#s5-r3", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.28, ease: "power2.out" }, 14.3);
+      tl.fromTo("#s5-total", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, 14.72);
+      tl.fromTo("#s5-accept", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, 15.0);
+      tl.fromTo("#s5-cursor", { opacity: 0, x: 520, y: 250 }, { opacity: 1, x: 330, y: 344, duration: 0.42, ease: "power2.inOut" }, 15.14);
+      tl.to("#s5-accept", { scale: 0.965, duration: 0.1, ease: "power2.in" }, 15.58);
+      tl.to("#s5-accept", { scale: 1, duration: 0.14, ease: "power2.out" }, 15.68);
+      tl.to("#s5-accept", { backgroundColor: "#f4b942", duration: 0.18, ease: "power2.out" }, 15.7);
+      tl.to("#s5-accept-label", { opacity: 0, duration: 0.12 }, 15.7);
+      tl.fromTo("#s5-confirmed", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, 15.76);
+      tl.to("#s5-cursor", { opacity: 0, duration: 0.15 }, 15.82);
+
+      /* Scene 6 — Outro */
+      tl.fromTo("#s6-glow", { opacity: 0.5, scale: 0.9 }, { opacity: 1, scale: 1.08, duration: 3.0, ease: "sine.inOut" }, 16.6);
+      tl.to("#s6-stroke1", { strokeDashoffset: 0, duration: 0.45, ease: "power2.inOut" }, 16.7);
+      tl.to("#s6-stroke2", { strokeDashoffset: 0, duration: 0.45, ease: "power2.inOut" }, 16.82);
+      tl.fromTo("#s6-dot", { scale: 0 }, { scale: 1, duration: 0.35, ease: "back.out(2.4)" }, 17.05);
+      tl.fromTo("#s6-word", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 16.86);
+      tl.fromTo("#s6-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 17.26);
+      tl.fromTo("#s6-tag", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 17.85);
+      tl.fromTo("#s6-honest", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 18.4);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

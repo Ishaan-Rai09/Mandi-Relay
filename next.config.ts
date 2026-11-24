@@ -51,6 +51,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Navigation inside a workspace is dynamic (the session cookie is read on
+    // every render), so Next would otherwise re-fetch the whole route from the
+    // server on every click, including back/forward. Keeping the client router
+    // cache warm for a short window makes revisits and history navigation
+    // instant, while mutations still refresh through revalidatePath and every
+    // fresh page load is server-rendered.
+    staleTimes: { dynamic: 30, static: 180 },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

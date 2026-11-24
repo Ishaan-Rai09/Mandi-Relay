@@ -1,0 +1,783 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 8,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "composition_file_too_large",
+        "severity": "warning",
+        "message": "This HTML composition file has 454 lines. Smaller sub-compositions are easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Split coherent scenes or layers into separate .html files under compositions/, then mount them from the parent with data-composition-src so each file stays small enough to inspect, revise, and validate independently."
+      },
+      {
+        "code": "timeline_track_too_dense",
+        "severity": "warning",
+        "message": "This HTML file has 6 timed elements. Smaller sub-compositions keep timelines easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move coherent scene groups into separate .html files under compositions/ and mount them from the parent with data-composition-src so the timeline stays easier to inspect, revise, and validate."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s1\"> is a timeline element that contains nested <div id=\"s1-inner\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s1",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s1\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s2\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s2",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s2\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s3\"> is a timeline element that contains nested <div id=\"s3-cam\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s3",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s3\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s4\"> is a timeline element that contains nested <div id=\"s4-grid\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s4",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s4\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s5\"> is a timeline element that contains nested <div id=\"s5-grid\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s5",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s5\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"s6\"> is a timeline element that contains nested <div id=\"s6-glow\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s6",
+        "dataAttributes": {},
+        "sourceFile": "E:\\Projects\\mandi\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"s6\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "duration": 20,
+    "samples": [
+      1.111,
+      3.333,
+      5.556,
+      7.778,
+      10,
+      12.222,
+      14.444,
+      16.667,
+      18.889
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 0,
+    "truncated": false,
+    "faceCheck": {
+      "ran": true,
+      "candidates": 0,
+      "faces": 0
+    }
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      1.111,
+      5.556,
+      10,
+      14.444,
+      18.889
+    ],
+    "checked": 113,
+    "passed": 113
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 66 text elements stay under it for 0.5 s or more, the smallest \"Live\" at 11 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Live",
+        "selector": "#s3-live",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1622.82,
+          "y": 773.99,
+          "width": 30.29,
+          "height": 13.04
+        },
+        "time": 8.625,
+        "times": [
+          0.25,
+          1,
+          1,
+          1,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          2.75,
+          3,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.375,
+          6.75,
+          6.75,
+          6.875,
+          7.25,
+          7.5,
+          7.875,
+          8.25,
+          8.625,
+          8.625,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.875,
+          10.5,
+          10.5,
+          10.5,
+          11,
+          11,
+          11,
+          11.625,
+          11.625,
+          11.625,
+          11.625,
+          12,
+          13.375,
+          13.375,
+          13.5,
+          13.5,
+          13.75,
+          13.75,
+          14.125,
+          14.125,
+          14.375,
+          14.375,
+          14.875,
+          14.875,
+          15.125,
+          15.875,
+          18.5
+        ],
+        "fontPx": 11.18,
+        "floorPx": 28,
+        "seconds": 1,
+        "elements": [
+          {
+            "selector": "#s3-live",
+            "text": "Live",
+            "fontPx": 11.18,
+            "time": 8.625,
+            "seconds": 1
+          },
+          {
+            "selector": "#s4-best",
+            "text": "Best net",
+            "fontPx": 14.89,
+            "time": 12,
+            "seconds": 1.25
+          },
+          {
+            "selector": "#s4-row1 > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "net to you",
+            "fontPx": 17,
+            "time": 10.5,
+            "seconds": 2.75
+          },
+          {
+            "selector": "#s4-row2 > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "net to you",
+            "fontPx": 17,
+            "time": 11,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s4-row3 > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "net to you",
+            "fontPx": 17,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.q-label",
+            "text": "The sentence",
+            "fontPx": 17.12,
+            "time": 6.75,
+            "seconds": 2.875
+          },
+          {
+            "selector": "span.rec-pill",
+            "text": "REC",
+            "fontPx": 18,
+            "time": 3,
+            "seconds": 3.25
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Available",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "From",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(3) > div:nth-of-type(1)",
+            "text": "Location",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(4) > div:nth-of-type(1)",
+            "text": "Status",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Reading the sentence",
+            "fontPx": 18.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.s-row",
+            "text": "Extracting fields…",
+            "fontPx": 18.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.top > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "per kg",
+            "fontPx": 19,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s4-row1 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "/kg",
+            "fontPx": 19,
+            "time": 10.5,
+            "seconds": 2.75
+          },
+          {
+            "selector": "#s4-row2 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "/kg",
+            "fontPx": 19,
+            "time": 11,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s4-row3 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "/kg",
+            "fontPx": 19,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.eyebrow2",
+            "text": "Best net offer",
+            "fontPx": 19,
+            "time": 13.5,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Structured listing",
+            "fontPx": 19.02,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "div.q-foot",
+            "text": "Mapped into the fields on the right",
+            "fontPx": 19.13,
+            "time": 6.75,
+            "seconds": 2.875
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Voice listing",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "AI extraction preview",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "Produce",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "Quantity",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4) > span:nth-of-type(1)",
+            "text": "Available",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > span:nth-of-type(1)",
+            "text": "Location",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(6) > span:nth-of-type(1)",
+            "text": "Seeking",
+            "fontPx": 19.91,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.note",
+            "text": "fee and freight shown separately",
+            "fontPx": 19.98,
+            "time": 14.875,
+            "seconds": 1.75
+          },
+          {
+            "selector": "#s1-eyebrow",
+            "text": "Mandi Relay · Voice-first marketplace",
+            "fontPx": 20,
+            "time": 0.25,
+            "seconds": 2.375
+          },
+          {
+            "selector": "#s4-row1 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "12 km away · retailer",
+            "fontPx": 20,
+            "time": 10.5,
+            "seconds": 2.75
+          },
+          {
+            "selector": "#s4-row2 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "9 km away · restaurant",
+            "fontPx": 20,
+            "time": 11,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s4-row3 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "16 km away · wholesaler",
+            "fontPx": 20,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.tag > span:nth-of-type(1)",
+            "text": "Offer breakdown",
+            "fontPx": 20,
+            "time": 13.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "div.tag > span:nth-of-type(2)",
+            "text": "Kharar Fresh Mart",
+            "fontPx": 20,
+            "time": 13.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Voice listing",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Structured listing",
+            "fontPx": 20.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s3-f1 > span:nth-of-type(1)",
+            "text": "Produce",
+            "fontPx": 20.18,
+            "time": 6.875,
+            "seconds": 2.75
+          },
+          {
+            "selector": "#s3-f2 > span:nth-of-type(1)",
+            "text": "Quantity",
+            "fontPx": 20.29,
+            "time": 7.25,
+            "seconds": 2.375
+          },
+          {
+            "selector": "#s3-f3 > span:nth-of-type(1)",
+            "text": "Available",
+            "fontPx": 20.37,
+            "time": 7.5,
+            "seconds": 2.125
+          },
+          {
+            "selector": "#s3-f4 > span:nth-of-type(1)",
+            "text": "Location",
+            "fontPx": 20.48,
+            "time": 7.875,
+            "seconds": 1.75
+          },
+          {
+            "selector": "#s3-f5 > span:nth-of-type(1)",
+            "text": "Seeking",
+            "fontPx": 20.59,
+            "time": 8.25,
+            "seconds": 1.375
+          },
+          {
+            "selector": "div.meta",
+            "text": "500 kg · ₹20/kg · Kharar, Mohali",
+            "fontPx": 20.7,
+            "time": 8.625,
+            "seconds": 1
+          },
+          {
+            "selector": "div.variety",
+            "text": "Grade A · Vegetables",
+            "fontPx": 21,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s3-left-note",
+            "text": "Nothing guessed. Every field came from your sentence.",
+            "fontPx": 21.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s4-count",
+            "text": "3 offers",
+            "fontPx": 21.52,
+            "time": 11.625,
+            "seconds": 1.625
+          },
+          {
+            "selector": "#s2-panel > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Speak in Hindi, Punjabi or English",
+            "fontPx": 21.9,
+            "time": 2.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#s5-total > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "You receive",
+            "fontPx": 21.98,
+            "time": 14.875,
+            "seconds": 1.75
+          },
+          {
+            "selector": "#s5-decision > p:nth-of-type(1)",
+            "text": "The farmer stays in control. Nothing is committed without this click.",
+            "fontPx": 22,
+            "time": 13.5,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s3-panel > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Every field editable before publish",
+            "fontPx": 22.03,
+            "time": 6.375,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s6-honest",
+            "text": "No payment taken in this build.",
+            "fontPx": 23,
+            "time": 18.5,
+            "seconds": 1.5
+          },
+          {
+            "selector": "div.cap > span:nth-of-type(1)",
+            "text": "no form-filling",
+            "fontPx": 24,
+            "time": 1,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.cap > span:nth-of-type(2)",
+            "text": "no call centre",
+            "fontPx": 24,
+            "time": 1,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.cap > span:nth-of-type(3)",
+            "text": "no middleman",
+            "fontPx": 24,
+            "time": 1,
+            "seconds": 1.625
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "500 kg",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Tomorrow",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(3) > div:nth-of-type(2)",
+            "text": "Kharar, Mohali",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.listing-meta > div:nth-of-type(4) > div:nth-of-type(2)",
+            "text": "Live",
+            "fontPx": 24,
+            "time": 9.75,
+            "seconds": 3.5
+          },
+          {
+            "selector": "div.s",
+            "text": "Every offer ranked by what actually reaches the farmer.",
+            "fontPx": 24,
+            "time": 9.875,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#s5-accept-label",
+            "text": "Accept offer",
+            "fontPx": 26.78,
+            "time": 15.125,
+            "seconds": 0.75
+          },
+          {
+            "selector": "#s5-r1 > span:nth-of-type(1)",
+            "text": "Gross value",
+            "fontPx": 27,
+            "time": 13.75,
+            "seconds": 2.875
+          },
+          {
+            "selector": "#s5-r1 > span:nth-of-type(2)",
+            "text": "₹11,000",
+            "fontPx": 27,
+            "time": 13.75,
+            "seconds": 2.875
+          },
+          {
+            "selector": "#s5-r2 > span:nth-of-type(1)",
+            "text": "Platform fee (1.5%)",
+            "fontPx": 27,
+            "time": 14.125,
+            "seconds": 2.5
+          },
+          {
+            "selector": "#s5-r2 > span:nth-of-type(2)",
+            "text": "−₹165",
+            "fontPx": 27,
+            "time": 14.125,
+            "seconds": 2.5
+          },
+          {
+            "selector": "#s5-r3 > span:nth-of-type(1)",
+            "text": "Freight estimate (12 km)",
+            "fontPx": 27,
+            "time": 14.375,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s5-r3 > span:nth-of-type(2)",
+            "text": "−₹45",
+            "fontPx": 27,
+            "time": 14.375,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s5-confirmed",
+            "text": "Order confirmed",
+            "fontPx": 27,
+            "time": 15.875,
+            "seconds": 0.75
+          }
+        ]
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 160
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

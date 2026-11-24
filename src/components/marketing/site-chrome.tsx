@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Wordmark } from "@/components/layout/wordmark";
@@ -14,6 +14,7 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-ivory-300/80 bg-ivory/85 backdrop-blur-md">
+      {/* `relative` anchors the mobile menu panel to the full header width. */}
       <div className="container-x flex h-16 items-center justify-between gap-4">
         <Link href="/" aria-label="Mandi Relay home">
           <Wordmark />
@@ -27,6 +28,37 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Phones otherwise lose every section link in the header. */}
+          <details className="group md:hidden">
+            <summary
+              className="grid size-9 cursor-pointer list-none place-items-center rounded-[5px] text-charcoal-500 transition-colors hover:bg-charcoal/[0.05] hover:text-charcoal [&::-webkit-details-marker]:hidden"
+              aria-label="Menu"
+            >
+              <Menu className="size-[18px]" aria-hidden />
+            </summary>
+            <div className="absolute inset-x-0 top-full z-50 border-b border-ivory-300 bg-ivory px-4 pb-4 pt-1 shadow-[var(--shadow-e3)]">
+              <ul className="divide-y divide-ivory-200">
+                {[
+                  { href: "/#how-it-works", label: t("nav.howItWorks") },
+                  { href: "/#voice", label: t("nav.voiceListing") },
+                  { href: "/marketplace-preview", label: t("nav.marketplace") },
+                  { href: "/#trust", label: t("nav.trust") },
+                  ...(user
+                    ? []
+                    : [{ href: "/auth", label: t("nav.signIn") }]),
+                ].map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="block py-3 text-[14px] font-medium text-charcoal-700 transition-colors hover:text-forest-700"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </details>
           <LanguageSwitcher />
           {user ? (
             <ButtonLink href={ROLE_HOME[user.role]} size="sm" variant="primary" icon={<ArrowRight className="size-3.5" />}>

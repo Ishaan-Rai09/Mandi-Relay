@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
+    "db:admin": "tsx scripts/ensure-admin.ts",
     "prices:sync": "node --import tsx scripts/sync-market-prices.ts",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",

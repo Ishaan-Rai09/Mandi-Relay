@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Info, X } from "lucide-react";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
@@ -38,7 +37,6 @@ const icons: Record<ToastTone, ReactNode> = {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const reduced = useReducedMotion();
 
   const remove = useCallback((id: string) => {
     setToasts((current) => current.filter((t) => t.id !== id));
@@ -71,40 +69,34 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         aria-atomic="false"
         className="pointer-events-none fixed inset-x-0 bottom-4 z-[80] flex flex-col items-center gap-2 px-4 sm:bottom-auto sm:left-auto sm:right-6 sm:top-6 sm:items-end"
       >
-        <AnimatePresence initial={false}>
-          {toasts.map((toast) => (
-            <motion.div
-              key={toast.id}
-              initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
-              animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18 }}
-              className={cn(
-                "pointer-events-auto flex w-full max-w-sm items-start gap-2.5 rounded-[6px] border bg-white px-3.5 py-3 shadow-[var(--shadow-e3)]",
-                toast.tone === "error" && "border-danger/30",
-                toast.tone === "success" && "border-success/25",
-                toast.tone === "info" && "border-info/25",
-              )}
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={cn(
+              "toast-in pointer-events-auto flex w-full max-w-sm items-start gap-2.5 rounded-[6px] border bg-white px-3.5 py-3 shadow-[var(--shadow-e3)]",
+              toast.tone === "error" && "border-danger/30",
+              toast.tone === "success" && "border-success/25",
+              toast.tone === "info" && "border-info/25",
+            )}
+          >
+            <span className="mt-px">{icons[toast.tone]}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-charcoal">{toast.title}</p>
+              {toast.description ? (
+                <p className="mt-0.5 text-[12.5px] leading-relaxed text-charcoal-500">
+                  {toast.description}
+                </p>
+              ) : null}
+            </div>
+            <button
+              onClick={() => remove(toast.id)}
+              className="rounded p-0.5 text-charcoal-400 transition-colors hover:text-charcoal"
+              aria-label="Dismiss notification"
             >
-              <span className="mt-px">{icons[toast.tone]}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-charcoal">{toast.title}</p>
-                {toast.description ? (
-                  <p className="mt-0.5 text-[12.5px] leading-relaxed text-charcoal-500">
-                    {toast.description}
-                  </p>
-                ) : null}
-              </div>
-              <button
-                onClick={() => remove(toast.id)}
-                className="rounded p-0.5 text-charcoal-400 transition-colors hover:text-charcoal"
-                aria-label="Dismiss notification"
-              >
-                <X className="size-3.5" />
-              </button>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+              <X className="size-3.5" />
+            </button>
+          </div>
+        ))}
       </div>
     </ToastContext.Provider>
   );
