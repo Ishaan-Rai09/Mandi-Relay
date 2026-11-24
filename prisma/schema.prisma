@@ -7,7 +7,11 @@
 // `src/lib/domain.ts` and are validated in `src/lib/schemas.ts`.
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // Reads with `include` compile to one SQL statement with joins instead of
+  // one query per relation. This database lives in another region, so each
+  // extra round trip costs real time; see src/lib/db.ts.
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
