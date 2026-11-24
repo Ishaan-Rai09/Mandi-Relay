@@ -66,6 +66,34 @@ export function CheckRow({ children, tone = "forest" }: { children: ReactNode; t
   );
 }
 
+/**
+ * Numeric cell for the landing price table. Below `sm` the table rows become
+ * stacked cards, so each cell carries its own column label.
+ */
+export function PriceCell({
+  label,
+  value,
+  tone = "default",
+}: {
+  label: string;
+  value: string;
+  tone?: "default" | "modal";
+}) {
+  return (
+    <td
+      className={cn(
+        "px-3 py-2 tabular max-sm:px-0 max-sm:py-0",
+        tone === "modal" ? "font-semibold text-forest-700" : "text-charcoal-500",
+      )}
+    >
+      <span className="hidden text-[9.5px] font-semibold uppercase tracking-[0.08em] text-sage max-sm:block">
+        {label}
+      </span>
+      {value}
+    </td>
+  );
+}
+
 export function Stat({
   label,
   value,

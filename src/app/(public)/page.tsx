@@ -26,7 +26,7 @@ import { ListingCard } from "@/components/marketplace/listing-card";
 import { Countdown, LiveDot } from "@/components/marketplace/countdown";
 import { ButtonLink } from "@/components/ui/button";
 import { Panel } from "@/components/ui/panel";
-import { CheckRow, Stat } from "@/components/ui/misc";
+import { CheckRow, PriceCell, Stat } from "@/components/ui/misc";
 import { Reveal } from "@/components/ui/reveal";
 import { db } from "@/lib/db";
 import { searchListings } from "@/lib/queries/listings";
@@ -538,46 +538,53 @@ export default async function LandingPage() {
 
             <Reveal delay={0.06}>
               <Panel className="overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[480px] border-collapse text-left">
-                    <thead>
-                      <tr className="border-b border-ivory-300 bg-ivory">
-                        {["Commodity", "Market", "Min", "Max", "Modal", "Reported"].map((header) => (
-                          <th
-                            key={header}
-                            scope="col"
-                            className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-sage"
+                {latestRefs.length === 0 ? (
+                  <p className="px-4 py-10 text-center text-[12.5px] leading-relaxed text-charcoal-400">
+                    No reference prices loaded yet. They appear once the official feed is synced.
+                  </p>
+                ) : (
+                  <div className="sm:overflow-x-auto">
+                    {/* Phones get one card per price: six columns cannot fit in
+                        390px without a sideways scroll nobody discovers. */}
+                    <table className="w-full border-collapse text-left sm:min-w-[480px]">
+                      <thead className="max-sm:hidden">
+                        <tr className="border-b border-ivory-300 bg-ivory">
+                          {["Commodity", "Market", "Min", "Max", "Modal", "Reported"].map((header) => (
+                            <th
+                              key={header}
+                              scope="col"
+                              className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-sage"
+                            >
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-ivory-200 max-sm:block">
+                        {latestRefs.slice(0, 6).map((ref) => (
+                          <tr
+                            key={ref.id}
+                            className="text-[12px] max-sm:grid max-sm:grid-cols-3 max-sm:gap-x-3 max-sm:gap-y-1 max-sm:px-3.5 max-sm:py-3"
                           >
-                            {header}
-                          </th>
+                            <td className="px-3 py-2 font-semibold text-charcoal max-sm:col-span-2 max-sm:px-0 max-sm:py-0">
+                              {ref.commodity}
+                            </td>
+                            <td className="px-3 py-2 text-charcoal-500 max-sm:col-span-1 max-sm:px-0 max-sm:py-0 max-sm:text-right max-sm:text-[11px]">
+                              {ref.market}
+                            </td>
+                            <PriceCell label="Min" value={formatINR(ref.minPrice)} />
+                            <PriceCell label="Max" value={formatINR(ref.maxPrice)} />
+                            <PriceCell label="Modal" value={formatINR(ref.modalPrice)} tone="modal" />
+                            <td className="px-3 py-2 text-charcoal-400 max-sm:col-span-3 max-sm:px-0 max-sm:py-0 max-sm:text-[10.5px]">
+                              <span className="hidden max-sm:inline">Reported </span>
+                              {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(ref.reportDate)}
+                            </td>
+                          </tr>
                         ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-ivory-200">
-                      {latestRefs.slice(0, 6).map((ref) => (
-                        <tr key={ref.id} className="text-[12px]">
-                          <td className="px-3 py-2 font-semibold text-charcoal">{ref.commodity}</td>
-                          <td className="px-3 py-2 text-charcoal-500">{ref.market}</td>
-                          <td className="px-3 py-2 text-charcoal-500 tabular">{formatINR(ref.minPrice)}</td>
-                          <td className="px-3 py-2 text-charcoal-500 tabular">{formatINR(ref.maxPrice)}</td>
-                          <td className="px-3 py-2 font-semibold text-forest-700 tabular">
-                            {formatINR(ref.modalPrice)}
-                          </td>
-                          <td className="px-3 py-2 text-charcoal-400">
-                            {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(ref.reportDate)}
-                          </td>
-                        </tr>
-                      ))}
-                      {latestRefs.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="px-3 py-8 text-center text-[12.5px] text-charcoal-400">
-                            No reference prices loaded yet. They appear once the official feed is synced.
-                          </td>
-                        </tr>
-                      ) : null}
-                    </tbody>
-                  </table>
-                </div>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
                 <div className="border-t border-ivory-200 bg-ivory px-3 py-2 text-[10.5px] text-charcoal-400">
                   Prices per quintal · Source: Agmarknet, Directorate of Marketing &amp; Inspection · Wholesale reference, not a transaction price
                 </div>

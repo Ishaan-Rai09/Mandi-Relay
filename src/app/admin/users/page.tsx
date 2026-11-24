@@ -71,7 +71,7 @@ export default async function AdminUsersPage({
 
       <Panel>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] text-left">
+          <table className="data-table w-full text-left sm:min-w-[820px]">
             <thead>
               <tr className="border-b border-ivory-200 bg-ivory/60">
                 {["Account", "Role", "Location", "Activity", "Contact", "Joined", "Verification"].map(
@@ -99,15 +99,15 @@ export default async function AdminUsersPage({
                       {user.farm?.farmName ?? user.business?.businessName ?? "—"}
                     </p>
                   </td>
-                  <td className="px-3.5 py-2.5">
+                  <td data-label="Role" className="px-3.5 py-2.5">
                     <Pill tone={user.role === "ADMIN" ? "forest" : "neutral"}>
                       {ROLE_LABEL[user.role as Role]}
                     </Pill>
                   </td>
-                  <td className="px-3.5 py-2.5 text-charcoal-500">
+                  <td data-label="Location" className="px-3.5 py-2.5 text-charcoal-500">
                     {[user.village, user.district].filter(Boolean).join(", ") || "—"}
                   </td>
-                  <td className="px-3.5 py-2.5 text-[11px] text-charcoal-500">
+                  <td data-label="Activity" className="px-3.5 py-2.5 text-[11px] text-charcoal-500">
                     {user.role === "FARMER"
                       ? `${formatNumber(user._count.listings)} lots`
                       : user.role === "BUYER"
@@ -116,11 +116,11 @@ export default async function AdminUsersPage({
                           ? `${user.transporter.vehicleType} · ${formatNumber(user.transporter.capacityKg)} kg`
                           : "—"}
                   </td>
-                  <td className="px-3.5 py-2.5 font-mono text-[10.5px] text-charcoal-400">
+                  <td data-label="Contact" className="px-3.5 py-2.5 font-mono text-[10.5px] text-charcoal-400">
                     {maskPhone(user.phone)}
                   </td>
-                  <td className="px-3.5 py-2.5 text-[11px] text-charcoal-400">{formatDate(user.createdAt)}</td>
-                  <td className="px-3.5 py-2.5">
+                  <td data-label="Joined" className="px-3.5 py-2.5 text-[11px] text-charcoal-400">{formatDate(user.createdAt)}</td>
+                  <td data-label="Verification" className="px-3.5 py-2.5">
                     <div className="flex items-center gap-1.5">
                       <Pill tone={user.verified ? "success" : "neutral"}>
                         {user.verified ? "Verified" : "Unverified"}

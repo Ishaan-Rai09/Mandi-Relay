@@ -64,7 +64,7 @@ export default async function AdminTransactionsPage() {
       <Panel>
         <PanelHeader title="Orders" description="Newest first." />
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left">
+          <table className="data-table w-full text-left sm:min-w-[900px]">
             <thead>
               <tr className="border-b border-ivory-200 bg-ivory/60">
                 {["Order", "Lot", "Farmer → Buyer", "Qty", "Gross", "Fee", "Freight", "Net", "Status", "Date"].map(
@@ -94,23 +94,23 @@ export default async function AdminTransactionsPage() {
                       {order.orderNo}
                       
                     </td>
-                    <td className="px-3 py-2 text-charcoal-500">{order.listing.commodity}</td>
-                    <td className="px-3 py-2 text-charcoal-500">
+                    <td data-label="Lot" className="px-3 py-2 text-charcoal-500">{order.listing.commodity}</td>
+                    <td data-label="Parties" className="px-3 py-2 text-charcoal-500">
                       {order.farmer.name}
                       <span className="text-charcoal-400"> → </span>
                       {order.buyer.name}
                     </td>
-                    <td className="px-3 py-2 text-charcoal-500 tabular">{formatNumber(order.quantity)} kg</td>
-                    <td className="px-3 py-2 text-charcoal tabular">{formatINR(order.grossValue)}</td>
-                    <td className="px-3 py-2 text-charcoal-400 tabular">{formatINR(order.platformFee)}</td>
-                    <td className="px-3 py-2 text-charcoal-400 tabular">{formatINR(order.transportCost)}</td>
-                    <td className="px-3 py-2 font-medium text-forest-800 tabular">{formatINR(order.netToFarmer)}</td>
-                    <td className="px-3 py-2">
+                    <td data-label="Qty" className="px-3 py-2 text-charcoal-500 tabular">{formatNumber(order.quantity)} kg</td>
+                    <td data-label="Gross" className="px-3 py-2 text-charcoal tabular">{formatINR(order.grossValue)}</td>
+                    <td data-label="Fee" className="px-3 py-2 text-charcoal-400 tabular">{formatINR(order.platformFee)}</td>
+                    <td data-label="Freight" className="px-3 py-2 text-charcoal-400 tabular">{formatINR(order.transportCost)}</td>
+                    <td data-label="Net" className="px-3 py-2 font-medium text-forest-800 tabular">{formatINR(order.netToFarmer)}</td>
+                    <td data-label="Status" className="px-3 py-2">
                       <Pill tone={order.status === "DELIVERED" || order.status === "COMPLETED" ? "success" : "gold"}>
                         {order.status.replace("_", " ").toLowerCase()}
                       </Pill>
                     </td>
-                    <td className="px-3 py-2 text-[10.5px] text-charcoal-400">{formatDate(order.createdAt)}</td>
+                    <td data-label="Date" className="px-3 py-2 text-[10.5px] text-charcoal-400">{formatDate(order.createdAt)}</td>
                   </tr>
                 ))
               )}

@@ -3,6 +3,7 @@ import { ArrowRight, Menu } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Wordmark } from "@/components/layout/wordmark";
+import { PublicTabBar } from "@/components/marketing/public-tab-bar";
 import { ButtonLink } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/auth";
 import { ROLE_HOME } from "@/lib/domain";
@@ -13,11 +14,13 @@ export async function SiteHeader() {
   const { t } = await getI18n();
 
   return (
+    <>
     <header className="sticky top-0 z-40 border-b border-ivory-300/80 bg-ivory/85 backdrop-blur-md">
       {/* `relative` anchors the mobile menu panel to the full header width. */}
       <div className="container-x flex h-16 items-center justify-between gap-4">
-        <Link href="/" aria-label="Mandi Relay home">
-          <Wordmark />
+        <Link href="/" aria-label="Mandi Relay home" className="min-w-0 shrink-0">
+          <Wordmark className="max-sm:hidden" />
+          <Wordmark compact className="sm:hidden" />
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-7 text-[13px] font-medium text-charcoal-500 md:flex">
@@ -28,8 +31,9 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Phones otherwise lose every section link in the header. */}
-          <details className="group md:hidden">
+          {/* Phones otherwise lose every section link in the header. The
+              installed app swaps this for the bottom tab bar instead. */}
+          <details className="group md:hidden max-md:standalone:hidden">
             <summary
               className="grid size-9 cursor-pointer list-none place-items-center rounded-[5px] text-charcoal-500 transition-colors hover:bg-charcoal/[0.05] hover:text-charcoal [&::-webkit-details-marker]:hidden"
               aria-label="Menu"
@@ -54,14 +58,37 @@ export async function SiteHeader() {
                     >
                       {item.label}
                     </Link>
-                  </li>
-                ))}
+                  </li>                  ))}
               </ul>
+              {user ? (
+                // The signed-in CTA is too wide for a 320px header, so phones
+                // carry it here instead of beside the menu button.
+                <div className="pt-3 sm:hidden">
+                  <ButtonLink
+                    href={ROLE_HOME[user.role]}
+                    size="sm"
+                    variant="primary"
+                    icon={<ArrowRight className="size-3.5" />}
+                    className="w-full justify-center"
+                  >
+                    {t("nav.openWorkspace")}
+                  </ButtonLink>
+                </div>
+              ) : null}
+              <div className="pt-3 sm:hidden">
+                <LanguageSwitcher className="w-full justify-between" />
+              </div>
             </div>
           </details>
-          <LanguageSwitcher />
+          <LanguageSwitcher className="hidden sm:inline-flex" />
           {user ? (
-            <ButtonLink href={ROLE_HOME[user.role]} size="sm" variant="primary" icon={<ArrowRight className="size-3.5" />}>
+            <ButtonLink
+              href={ROLE_HOME[user.role]}
+              size="sm"
+              variant="primary"
+              icon={<ArrowRight className="size-3.5" />}
+              className="max-sm:hidden"
+            >
               {t("nav.openWorkspace")}
             </ButtonLink>
           ) : (
@@ -80,6 +107,8 @@ export async function SiteHeader() {
         </div>
       </div>
     </header>
+    <PublicTabBar signedIn={Boolean(user)} homeHref={user ? ROLE_HOME[user.role] : null} />
+    </>
   );
 }
 

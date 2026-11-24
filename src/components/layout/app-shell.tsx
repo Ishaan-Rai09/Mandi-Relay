@@ -96,11 +96,11 @@ export async function AppShell({
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-ivory-300 bg-ivory/90 backdrop-blur-md">
             <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-5">
-              <div className="flex items-center gap-3 lg:hidden">
-                <Link href="/" aria-label="Mandi Relay home">
-                  <Wordmark compact />
+              <div className="flex min-w-0 items-center gap-2.5 lg:hidden">
+                <Link href="/" aria-label="Mandi Relay home" className="shrink-0">
+                  <Wordmark compact className="whitespace-nowrap" />
                 </Link>
-                <span className="rounded-[3px] border border-ivory-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-sage">
+                <span className="hidden shrink-0 whitespace-nowrap rounded-[3px] border border-ivory-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-sage sm:inline-block">
                   {t(ROLE_ACCENT[user.role].labelKey)}
                 </span>
               </div>

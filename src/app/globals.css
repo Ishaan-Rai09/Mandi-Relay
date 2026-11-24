@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* True inside an installed PWA window (both Android and iOS). */
+@custom-variant standalone (@media (display-mode: standalone));
+
 /*
  * Mandi Relay design system.
  *
@@ -252,6 +255,51 @@
   @keyframes toast-in {
     from { opacity: 0; transform: translateY(10px) scale(0.98); }
     to { opacity: 1; transform: none; }
+  }
+}
+
+/*
+ * Wide data tables become one stacked record per row below `sm`, so a phone
+ * never has to scroll sideways to reach a column. The first cell is the record
+ * heading; every other cell carries its column name in `data-label`.
+ *
+ * Deliberately unlayered: the cells also carry Tailwind padding utilities, and
+ * these mobile overrides have to win over them.
+ */
+@media (max-width: 639px) {
+  .data-table { display: block; }
+  .data-table thead { display: none; }
+  .data-table tbody,
+  .data-table tr { display: block; }
+  .data-table tr { padding: 0.75rem 0.875rem; }
+  .data-table tbody tr + tr { border-top: 1px solid var(--color-ivory-200); }
+
+  .data-table td {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.1875rem 0;
+    text-align: right;
+  }
+
+  .data-table td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    /* Pushes the value to the right while keeping its parts together. */
+    margin-right: auto;
+    text-align: left;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-sage);
+  }
+
+  .data-table td:first-child {
+    display: block;
+    padding: 0 0 0.375rem;
+    text-align: left;
   }
 }
 

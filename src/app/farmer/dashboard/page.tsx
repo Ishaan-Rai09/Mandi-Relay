@@ -199,7 +199,7 @@ export default async function FarmerDashboard() {
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] text-left">
+                <table className="data-table w-full text-left sm:min-w-[520px]">
                   <thead>
                     <tr className="border-b border-ivory-200">
                       {["Produce", "Available", "Ask", "Status", "Added"].map((header) => (
@@ -225,13 +225,13 @@ export default async function FarmerDashboard() {
                           </span>
                           
                         </td>
-                        <td className="px-3.5 py-2.5 text-charcoal-500 tabular">
+                        <td data-label="Available" className="px-3.5 py-2.5 text-charcoal-500 tabular">
                           {formatNumber(listing.availableQuantity)} / {formatNumber(listing.quantity)} kg
                         </td>
-                        <td className="px-3.5 py-2.5 font-medium text-charcoal tabular">
+                        <td data-label="Ask" className="px-3.5 py-2.5 font-medium text-charcoal tabular">
                           {formatINR(listing.askingPrice)}/kg
                         </td>
-                        <td className="px-3.5 py-2.5">
+                        <td data-label="Status" className="px-3.5 py-2.5">
                           <Pill
                             tone={
                               listing.status === "ACTIVE"
@@ -246,7 +246,7 @@ export default async function FarmerDashboard() {
                               : LISTING_STATUS_LABEL[listing.status as ListingStatus]}
                           </Pill>
                         </td>
-                        <td className="px-3.5 py-2.5 text-[11px] text-charcoal-400">
+                        <td data-label="Added" className="px-3.5 py-2.5 text-[11px] text-charcoal-400">
                           {timeAgo(listing.createdAt)}
                         </td>
                       </tr>

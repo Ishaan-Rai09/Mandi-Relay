@@ -103,7 +103,7 @@ export default async function FarmerListingsPage({
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left">
+            <table className="data-table w-full text-left sm:min-w-[760px]">
               <thead>
                 <tr className="border-b border-ivory-200 bg-ivory/60">
                   {["Produce", "Available", "Asking", "Lot value", "Status", "Interest", "Added", ""].map(
@@ -136,17 +136,17 @@ export default async function FarmerListingsPage({
                         {listing.variety ? ` · ${listing.variety}` : ""}
                       </p>
                     </td>
-                    <td className="px-3.5 py-2.5 text-charcoal-500 tabular">
+                    <td data-label="Available" className="px-3.5 py-2.5 text-charcoal-500 tabular">
                       {formatNumber(listing.availableQuantity)}
                       <span className="text-charcoal-400"> / {formatNumber(listing.quantity)} kg</span>
                     </td>
-                    <td className="px-3.5 py-2.5 font-medium text-charcoal tabular">
+                    <td data-label="Asking" className="px-3.5 py-2.5 font-medium text-charcoal tabular">
                       {formatINR(listing.askingPrice)}/kg
                     </td>
-                    <td className="px-3.5 py-2.5 text-charcoal-500 tabular">
+                    <td data-label="Lot value" className="px-3.5 py-2.5 text-charcoal-500 tabular">
                       {formatINR(listing.availableQuantity * listing.askingPrice)}
                     </td>
-                    <td className="px-3.5 py-2.5">
+                    <td data-label="Status" className="px-3.5 py-2.5">
                       <Pill
                         tone={
                           listing.status === "ACTIVE"
@@ -163,7 +163,7 @@ export default async function FarmerListingsPage({
                           : LISTING_STATUS_LABEL[listing.status as ListingStatus]}
                       </Pill>
                     </td>
-                    <td className="px-3.5 py-2.5">
+                    <td data-label="Interest" className="px-3.5 py-2.5">
                       <div className="flex items-center gap-2 text-[11px] text-charcoal-500">
                         {listing._count.offers > 0 ? (
                           <Link href="/farmer/offers" className="hover:text-forest-700">
@@ -179,7 +179,7 @@ export default async function FarmerListingsPage({
                         ) : null}
                       </div>
                     </td>
-                    <td className="px-3.5 py-2.5 text-[11px] text-charcoal-400">
+                    <td data-label="Added" className="px-3.5 py-2.5 text-[11px] text-charcoal-400">
                       <span title={formatDate(listing.createdAt)}>{timeAgo(listing.createdAt)}</span>
                     </td>
                     <td className="px-3.5 py-2.5 text-right">

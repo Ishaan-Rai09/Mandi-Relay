@@ -3,7 +3,8 @@ import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-ivory">
+    // Installed apps show the bottom tab bar, so the footer needs room above it.
+    <div className="flex min-h-dvh flex-col bg-ivory max-md:standalone:pb-[calc(3.75rem+env(safe-area-inset-bottom))]">
       <SiteHeader />
       <main id="main" className="flex-1">
         {children}

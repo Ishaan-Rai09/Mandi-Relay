@@ -62,7 +62,7 @@ export default async function AdminListingsPage({
 
       <Panel>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left">
+          <table className="data-table w-full text-left sm:min-w-[860px]">
             <thead>
               <tr className="border-b border-ivory-200 bg-ivory/60">
                 {["Lot", "Farmer", "Quantity", "Ask", "State", "Moderation", "Listed", ""].map((header) => (
@@ -96,19 +96,19 @@ export default async function AdminListingsPage({
                       <span className="ml-1.5 text-[10.5px] text-charcoal-400">{listing.category.name}</span>
                       
                     </td>
-                    <td className="px-3.5 py-2.5 text-charcoal-500">
+                    <td data-label="Farmer" className="px-3.5 py-2.5 text-charcoal-500">
                       {listing.farmer.name}
                       <span className="block text-[10px] text-charcoal-400">
                         {listing.farmer.verified ? "verified" : "unverified"}
                       </span>
                     </td>
-                    <td className="px-3.5 py-2.5 text-charcoal-500 tabular">
+                    <td data-label="Quantity" className="px-3.5 py-2.5 text-charcoal-500 tabular">
                       {formatNumber(listing.availableQuantity)} / {formatNumber(listing.quantity)} kg
                     </td>
-                    <td className="px-3.5 py-2.5 text-charcoal-500 tabular">
+                    <td data-label="Ask" className="px-3.5 py-2.5 text-charcoal-500 tabular">
                       {formatINR(listing.askingPrice)}
                     </td>
-                    <td className="px-3.5 py-2.5">
+                    <td data-label="State" className="px-3.5 py-2.5">
                       <Pill
                         tone={
                           listing.status === "ACTIVE"
@@ -121,7 +121,7 @@ export default async function AdminListingsPage({
                         {listing.auction?.status === "LIVE" ? "auction" : listing.status.toLowerCase()}
                       </Pill>
                     </td>
-                    <td className="px-3.5 py-2.5">
+                    <td data-label="Moderation" className="px-3.5 py-2.5">
                       <Pill
                         tone={
                           listing.moderationStatus === "APPROVED"
@@ -134,7 +134,7 @@ export default async function AdminListingsPage({
                         {listing.moderationStatus.toLowerCase()}
                       </Pill>
                     </td>
-                    <td className="px-3.5 py-2.5 text-[10.5px] text-charcoal-400">
+                    <td data-label="Listed" className="px-3.5 py-2.5 text-[10.5px] text-charcoal-400">
                       <span title={formatDate(listing.createdAt)}>{timeAgo(listing.createdAt)}</span>
                       <span className="block">
                         {listing._count.offers} offers · {listing._count.orders} orders
