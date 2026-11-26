@@ -76,6 +76,9 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Vercel-managed analytics endpoints and script: always the edge's copy.
+  if (url.pathname.startsWith("/_vercel/")) return;
+
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)

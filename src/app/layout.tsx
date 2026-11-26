@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 
 // Self-hosted variable fonts: no build-time network dependency, cached by the
 // service worker, and correct Gurmukhi/Devanagari coverage for Punjabi and Hindi.
@@ -75,6 +76,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ToastProvider>{children}</ToastProvider>
         </LocaleProvider>
         <ServiceWorkerRegistrar />
+        {/* Vercel Web Analytics: cookieless, same-origin beacon to /_vercel/insights. */}
+        <Analytics />
       </body>
     </html>
   );
