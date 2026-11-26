@@ -1,12 +1,13 @@
 import "server-only";
 
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { ROLE_HOME, type Language, type Role, type SessionUser } from "@/lib/domain";
+import { clientIp } from "@/lib/request-ip";
 
 /**
  * Identity and authorisation.
@@ -27,6 +28,16 @@ import { ROLE_HOME, type Language, type Role, type SessionUser } from "@/lib/dom
 const COOKIE_NAME = "mr_session";
 const SESSION_DAYS = 30;
 
+/**
+ * Session rows hold only the SHA-256 of the cookie value, the same rule the
+ * password-reset tokens follow. A copy of the `Session` table (a dump, a backup,
+ * a support query) therefore contains nothing that can be replayed as a login,
+ * and the cookie — the only place the raw token exists — stays httpOnly.
+ */
+function hashSessionToken(raw: string) {
+  return createHash("sha256").update(raw).digest("hex");
+}
+
 /* ── Passwords ─────────────────────────────────────────────────────── */
 
 export { hashPassword, verifyPassword } from "@/lib/password";
@@ -46,7 +57,7 @@ export async function createSession(userId: string) {
   await db.session.create({
     data: {
       userId,
-      token,
+      token: hashSessionToken(token),
       expiresAt,
       userAgent: hdrs.get("user-agent")?.slice(0, 255) ?? null,
     },
@@ -66,7 +77,9 @@ export async function destroySession() {
   const jar = await cookies();
   const token = jar.get(COOKIE_NAME)?.value;
   if (token) {
-    await db.session.deleteMany({ where: { token } }).catch(() => undefined);
+    await db.session
+      .deleteMany({ where: { token: hashSessionToken(token) } })
+      .catch(() => undefined);
   }
   jar.delete(COOKIE_NAME);
 }
@@ -114,7 +127,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   if (!token) return null;
 
   const session = await db.session.findUnique({
-    where: { token },
+    where: { token: hashSessionToken(token) },
     select: { id: true, expiresAt: true, user: true },
   });
   if (!session) return null;
@@ -183,8 +196,7 @@ export async function audit(
   metadata?: Record<string, unknown>,
 ) {
   const hdrs = await headers();
-  const ip =
-    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? hdrs.get("x-real-ip") ?? null;
+  const ip = clientIp(hdrs) ?? null;
   await db.auditLog
     .create({
       data: {

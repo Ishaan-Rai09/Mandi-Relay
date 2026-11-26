@@ -402,6 +402,10 @@ model AuditLog {
   @@index([createdAt])
 }
 
+// A signed-in browser. `token` holds the SHA-256 of the cookie's value, never the
+// cookie itself, so a database leak cannot be replayed as a login (the same rule
+// as PasswordResetToken below). The column keeps its name for compatibility with
+// existing deployments.
 model Session {
   id        String   @id @default(uuid())
   userId    String

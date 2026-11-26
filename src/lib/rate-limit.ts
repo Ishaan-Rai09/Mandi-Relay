@@ -1,9 +1,13 @@
 /**
  * Small in-process rate limiter.
  *
- * Adequate for a single-instance deployment and for the prototype; a
- * multi-instance production deployment should back the same interface with
- * Redis or the platform's edge rate limiter.
+ * The bucket map lives in this process, so the effective limit is
+ * `configured limit × number of warm instances`, and a cold start forgets
+ * everything. That is fine for a single-instance deployment and for the
+ * prototype, but on serverless it is a speed bump, not a control: pair it with
+ * the platform's edge/WAF rate limiting, or back this same interface with
+ * Redis when a shared counter is required. Callers key it with `clientIp()`
+ * (see `request-ip.ts`), which does not trust a client-written header.
  */
 
 type Bucket = { count: number; resetAt: number };

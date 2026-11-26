@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSessionUser } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/request-ip";
 import { GNANI_LANGUAGE_CODES } from "@/lib/voice/providers";
 
 /**
@@ -122,8 +123,7 @@ export async function POST(request: Request) {
   const user = await getSessionUser();
   // Anonymous callers (the landing-page playground) are limited per address, not
   // as one shared "anon" bucket that a single visitor could exhaust.
-  const hdrs = request.headers;
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? hdrs.get("x-real-ip") ?? "local";
+  const ip = clientIp(request.headers);
   const limit = rateLimit(`gnani:${user?.id ?? `ip:${ip}`}`, 60, 60);
   if (!limit.allowed) {
     return NextResponse.json(

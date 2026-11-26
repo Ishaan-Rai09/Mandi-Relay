@@ -38,17 +38,11 @@ export function googleConfigured() {
 }
 
 /**
- * The public origin of this request. Reverse proxies terminate TLS and rewrite
- * the host, so the forwarded headers win when present.
+ * The public origin of this request. Forwarded headers are only believed when
+ * they point at a host we own — see `origin.ts`; an untrusted `x-forwarded-host`
+ * used to send the browser (and Google's `redirect_uri`) to any domain.
  */
-export function requestOrigin(request: Request) {
-  const url = new URL(request.url);
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? url.host;
-  const proto =
-    request.headers.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
-  return `${proto}://${host}`;
-}
+export { requestOrigin } from "@/lib/auth/origin";
 
 export function redirectUri(origin: string) {
   return `${origin}/api/auth/google/callback`;

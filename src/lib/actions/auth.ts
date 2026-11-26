@@ -15,6 +15,7 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/auth/admin";
+import { originFromHeaders } from "@/lib/auth/origin";
 import {
   completePasswordReset,
   requestPasswordReset,
@@ -24,6 +25,7 @@ import { db } from "@/lib/db";
 import { ROLE_HOME, type Role } from "@/lib/domain";
 import { emailConfigured } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/request-ip";
 import {
   fieldErrors,
   normalisePhone,
@@ -59,20 +61,15 @@ function destinationFor(user: { role: string; phone: string | null; email: strin
   return ROLE_HOME[user.role as Role];
 }
 
-/** Absolute origin for links in email: configured site URL, else the request. */
+/**
+ * Absolute origin for links in email: the configured site URL, else a request
+ * host we trust. Never a caller-supplied header, so a reset link cannot be
+ * pointed at someone else's domain. Localhost is the safe last resort when
+ * nothing is configured, which is a development-only situation.
+ */
 async function publicOrigin() {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (configured) return configured.replace(/\/+$/, "");
-
   const hdrs = await headers();
-  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "localhost:3000";
-  const proto =
-    hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
-
-function clientIp(hdrs: { get(name: string): string | null }) {
-  return hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  return originFromHeaders(hdrs) ?? "http://localhost:3000";
 }
 
 /* ── Email + password ──────────────────────────────────────────────── */
@@ -91,8 +88,7 @@ export async function signInAction(
   }
 
   const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  const byIp = rateLimit(`signin:${ip}`, 12, 300);
+  const byIp = rateLimit(`signin:${clientIp(hdrs)}`, 12, 300);
   const byEmail = rateLimit(`signin:email:${parsed.data.email}`, 8, 300);
   if (!byIp.allowed || !byEmail.allowed) {
     return {
@@ -137,8 +133,7 @@ export async function signUpAction(
   }
 
   const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  const limit = rateLimit(`signup:${ip}`, 6, 600);
+  const limit = rateLimit(`signup:${clientIp(hdrs)}`, 6, 600);
   if (!limit.allowed) {
     return { ok: false, message: "Too many sign-up attempts. Please try again shortly." };
   }

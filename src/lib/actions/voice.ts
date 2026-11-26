@@ -8,6 +8,7 @@ import type { ExtractedListing } from "@/lib/ai/extract";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/request-ip";
 
 export interface ExtractionResponse {
   ok: boolean;
@@ -31,8 +32,7 @@ export async function extractListingAction(transcript: string): Promise<Extracti
   }
 
   const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  const limit = rateLimit(`extract:${ip}`, 40, 60);
+  const limit = rateLimit(`extract:${clientIp(hdrs)}`, 40, 60);
   if (!limit.allowed) {
     return { ok: false, error: "Too many requests. Please wait a moment." };
   }
@@ -89,8 +89,7 @@ export async function parseSearchAction(text: string): Promise<SearchParseRespon
   if (trimmed.length < 3) return { ok: false, error: "Say what produce you are looking for." };
 
   const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  const limit = rateLimit(`search-parse:${ip}`, 60, 60);
+  const limit = rateLimit(`search-parse:${clientIp(hdrs)}`, 60, 60);
   if (!limit.allowed) return { ok: false, error: "Too many searches. Wait a moment and try again." };
 
   const user = await getSessionUser();

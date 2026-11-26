@@ -208,8 +208,9 @@ service layer: parse a Hinglish sentence, publish a listing, send an offer, coun
 accept it, confirm stock decrement and order maths, and exercise the auction engine
 (deliberately still covered while the feature is paused). It removes every row it created.
 
-`GET /api/health` reports database reachability and which integrations are configured,
-without exposing any secret.
+`GET /api/health` reports database reachability, without exposing any secret. Send
+`x-health-secret: $HEALTH_CHECK_SECRET` to also get row counts and which integrations are
+configured; anonymous callers get reachability only.
 
 ---
 
